@@ -2,104 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Operations Control Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin System Deck</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; max-width: 850px; margin: 0 auto; padding: 30px 20px; }
-        .admin-header { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Alert Banner */
-        .alert-banner { background: linear-gradient(90deg, #f59e0b, #d97706); color: #0f172a; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-        
-        .panel { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; }
-        .panel-title { font-size: 1.3rem; font-weight: bold; color: #38bdf8; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        
-        /* Interactive Checklist System */
-        .todo-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: #111827; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #38bdf8; }
-        .todo-item input[type="checkbox"] { transform: scale(1.3); margin-top: 4px; cursor: pointer; }
-        .todo-item input[type="checkbox"]:checked + span { text-decoration: line-through; color: #64748b; }
-        
-        /* Timeline Row Elements */
-        .pipeline-row { background: #111827; padding: 15px 20px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; }
-        .btn-open { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-open:hover { background: #059669; }
-        .btn-close { background: #475569; color: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-close:hover { background: #334155; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 800px; margin: 0 auto; padding: 15px; padding-bottom: 60px; }
+        .panel { background: #1e293b; padding: 20px; border-radius: 14px; border: 1px solid #334155; margin-bottom: 20px; }
+        h2 { color: #38bdf8; font-size: 1.25rem; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+        .form-row { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+        @media (min-width: 500px) { .form-row { grid-template-columns: 1fr 1fr; } .flex-row { display: flex; justify-content: space-between; align-items: center; } }
+        input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; }
+        .btn-blue { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-green { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-red { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .player-row { background: #111827; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div class="admin-header">
-        <div>
-            <h1 style="margin: 0; font-size: 1.75rem; color: #38bdf8;">🛠️ Systems Command Room</h1>
-            <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 0.95rem;">Application Director Dashboard</p>
-        </div>
-        <div style="background: #0f172a; padding: 10px 18px; border-radius: 8px; border: 1px solid #334155; text-align: right;">
-            <span style="font-size: 0.8rem; color: #64748b; display: block;">TARGET TARGETS</span>
-            <strong style="color: #34d399;">System: Active</strong>
-        </div>
+    <h1 style="color:#38bdf8; font-size:1.6rem; margin-bottom:20px;">🛠️ Liam's Operation Deck</h1>
+
+    <!-- FEATURE 1: DYNAMIC ACTIVE DAY CHANGER -->
+    <div class="panel">
+        <h2>🎯 Global Live Engine Switcher</h2>
+        <form action="/admin/set_active_day" method="POST" class="flex-row">
+            <label style="color:#cbd5e1; font-weight:bold; margin-right:10px;">Target Active Lesson:</label>
+            <select name="day_id" style="max-width:300px; margin: 10px 0;">
+                {% for d in days %}
+                    <option value="{{ d['id'] }}" {{ 'selected' if d['id'] == current_day_id }}>Day {{ d['day_number'] }}: {{ d['title'] }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-blue" style="padding:8px 20px;">Apply Target Sync</button>
+        </form>
     </div>
 
-    <!-- Check for Pending Releases/Alerts -->
-    {% set ns = namespace(has_alerts=false) %}
-    {% for day in days %}
-        {% if day['request_pending'] %}
-            {% set ns.has_alerts = true %}
-        {% endif %}
-    {% endfor %}
-
-    {% if ns.has_alerts %}
-        <div class="alert-banner">
-            🔔 SYSTEM ACTION REQUIRED: A parent has initiated an access override request on a locked module!
-        </div>
-    {% endif %}
-
-    <!-- Live Study Execution Checklist -->
+    <!-- FEATURE 2: INSTANT XP REWARD TRIGGERS -->
     <div class="panel">
-        <div class="panel-title">🗣️ Live Session Script & Checklist (Interactive)</div>
-        <p style="color: #94a3b8; margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem;">Check these off on your device as you lead the session with Jude and Beau:</p>
-        
-        {% for note in data['liam_notes'] %}
-            <label class="todo-item">
-                <input type="checkbox">
-                <span>{{ note }}</span>
-            </label>
-        {% endfor %}
-    </div>
-
-    <!-- Data Gate Pipeline Control -->
-    <div class="panel">
-        <div class="panel-title">🎛️ Content Pipeline Matrix</div>
-        {% for day in days %}
-            <div class="pipeline-row">
+        <h2>⚡ Core Point & Milestone Issuer</h2>
+        {% for p in profiles %}
+            <div class="player-row">
                 <div>
-                    <strong style="font-size: 1.05rem;">{{ day['title'] }}</strong>
-                    <div style="margin-top: 4px; font-size: 0.85rem;">
-                        <span style="color: {{ '#f43f5e' if day['is_locked'] else '#10b981' }}; font-weight: bold;">
-                            {{ '🔒 LOCKED' if day['is_locked'] else '🔓 OPEN TO FAMILY' }}
-                        </span>
-                        {% if day['request_pending'] %}
-                            <span style="color: #fbbf24; font-weight: bold; margin-left: 10px; animation: flash 1s infinite;">⚠️ PARENT ACCESS REQUESTED</span>
-                        {% endif %}
-                    </div>
+                    <strong>{{ p['display_name'] }}</strong> 
+                    <span style="color:#94a3b8; font-size:0.9rem; margin-left:10px;">Lvl {{ p['level'] }} ({{ p['points'] }} XP)</span>
                 </div>
-                
-                <div>
-                    {% if day['is_locked'] %}
-                        <form action="{{ url_for('unlock_day', day_id=day['id']) }}" method="POST">
-                            <button type="submit" class="btn-open">Approve & Unlock</button>
-                        </form>
-                    {% else %}
-                        <form action="{{ url_for('lock_day', day_id=day['id']) }}" method="POST">
-                            <button type="submit" class="btn-close">Re-Lock Gate</button>
-                        </form>
-                    {% endif %}
-                </div>
+                <form action="/admin/reward/{{ p['username'] }}" method="POST" style="display:flex; gap:5px;">
+                    <select name="xp" style="width:auto; padding:4px 8px; font-size:0.85rem;">
+                        <option value="25">+25 XP</option>
+                        <option value="50" selected>+50 XP</option>
+                        <option value="100">+100 XP</option>
+                    </select>
+                    <button type="submit" class="btn-green">Grant</button>
+                </form>
             </div>
         {% endfor %}
     </div>
 
-    <p style="text-align: center; margin-top: 30px;"><a href="/" style="color: #38bdf8; text-decoration: none;">← Exit Admin Console</a></p>
+    <!-- FEATURE 3: DYNAMIC LESSON BUILDER (ADD DAYS) -->
+    <div class="panel">
+        <h2>📝 Lesson Builder Pipeline Editor</h2>
+        <form action="/admin/add_day" method="POST">
+            <div class="form-row">
+                <input type="number" name="day_number" placeholder="Day Number (e.g. 4)" required>
+                <input type="text" name="title" placeholder="Lesson Title" required>
+            </div>
+            <div class="form-row">
+                <input type="text" name="verse" placeholder="Scripture Reference Text" required>
+                <input type="text" name="character_name" placeholder="Hero Character Profile Name" required>
+            </div>
+            <div style="margin-bottom:12px;">
+                <textarea name="kids_mission" rows="2" placeholder="Daily Interactive Mission Objective..." required></textarea>
+            </div>
+            <div class="form-row">
+                <textarea name="facts" rows="2" placeholder="Character Facts (One fact per line)"></textarea>
+                <textarea name="notes" rows="2" placeholder="Teaching Notes (One note per line)"></textarea>
+            </div>
+            <button type="submit" class="btn-blue" style="width:100%;">Compile & Publish Day</button>
+        </form>
+    </div>
 
+    <!-- PIPELINE SCHEDULER MATRIX -->
+    <div class="panel">
+        <h2>🗂️ Managed Course Matrix</h2>
+        {% for d in days %}
+            <div class="flex-row" style="background:#111827; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #334155; gap:10px;">
+                <div>
+                    <strong>Day {{ d['day_number'] }}: {{ d['title'] }}</strong>
+                    {% if d['request_pending'] %}<span style="color:#f59e0b; font-weight:bold; font-size:0.85rem; display:block;">⚠️ PARENT ACCESS OVERRIDE REQUESTED</span>{% endif %}
+                </div>
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    {% if d['is_locked'] %}
+                        <form action="/unlock_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-green">Unlock</button></form>
+                    {% else %}
+                        <form action="/lock_day/{{ d['id'] }}" method="POST"><button type="submit" style="background:#475569; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">Lock</button></form>
+                    {% endif %}
+                    <form action="/admin/delete_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-red">Delete</button></form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
