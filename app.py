@@ -4,107 +4,93 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 DB_FILE = "bible_study.db"
 
-# ========================================================
-# 1. YOUR EXACT PASSWORD DATABASE (UNTOUCHED)
-# ========================================================
-PASSWORD_DATABASE = {
-    "admin": "liam123",
-    "parent": "parents2026",
-    "student": "bibleheroes"
-}
-
-# ========================================================
-# 2. YOUR EXACT DAILY CONTENT & PROFILES (UNTOUCHED)
-# ========================================================
-DAILY_CONTENT = {
-    "verse": "Joshua 1:9 - \"Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.\"",
-    "character_name": "Joshua",
-    "character_facts": [
-        "He was Moses' trusted assistant before becoming the leader.",
-        "He lead the Israelites across the Jordan River into the Promised Land.",
-        "He is famous for the battle of Jericho."
-    ],
-    "kids_mission": "Encourage someone today when they are working hard or playing a game!",
-    
-    # INDIVIDUAL PROFILES FOR YOUR BROTHERS
-    "profiles": {
-        "jude": {
-            "name": "Jude",
-            "age": 9,
-            "level": 4,
-            "points": 450,
-            "badges": [
-                {"icon": "🧠", "title": "Memory Champion", "desc": "Recited a full verse perfectly"},
-                {"icon": "🛡️", "title": "Courage Badge", "desc": "Completed the Joshua Lesson"},
-                {"icon": "🔥", "title": "3-Day Streak", "desc": "Perfect focus 3 days in a row"}
-            ]
-        },
-        "beau": {
-            "name": "Beau",
-            "age": 7,
-            "level": 2,
-            "points": 250,
-            "badges": [
-                {"icon": "🛡️", "title": "Courage Badge", "desc": "Completed the Joshua Lesson"},
-                {"icon": "🙏", "title": "Prayer Warrior", "desc": "Led the family closing prayer"}
-            ]
-        }
-    },
-    
-    "liam_notes": [
-        "Read Joshua Chapter 1 out loud with the boys.",
-        "Explain what a 'successor' is.",
-        "Ask: What is something scary you had to do where you needed courage?",
-        "Remind them that being brave means trusting God anyway."
-    ],
-    
-    "parent_summary": "Today we kicked off our study on Joshua. We focused on courage and trusting God's promises.",
-    "parent_dinner_question": "Ask the boys what area of their lives they feel like they need the most courage in right now."
-}
-
-# ========================================================
-# 3. NEW DATABASE LAYER FOR THE RELEASE PIPELINE
-# ========================================================
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
-    """Sets up the multi-day schedule tracking table without altering dicts."""
     conn = get_db_connection()
     cursor = conn.cursor()
+    
+    # 1. Base study days table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS study_days (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             day_number INTEGER UNIQUE,
             title TEXT NOT NULL,
-            content TEXT NOT NULL,
+            verse TEXT NOT NULL,
+            character_name TEXT NOT NULL,
+            kids_mission TEXT NOT NULL,
             is_locked BOOLEAN DEFAULT 1,
             request_pending BOOLEAN DEFAULT 0
         )
     ''')
     
-    # Pre-populate 3 days if the database is brand new
-    cursor.execute("SELECT COUNT(*) FROM study_days")
+    # 2. Dynamic multi-line tables linked to days
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS character_facts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day_id INTEGER,
+            fact_text TEXT NOT NULL,
+            FOREIGN KEY(day_id) REFERENCES study_days(id) ON DELETE CASCADE
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS liam_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day_id INTEGER,
+            note_text TEXT NOT NULL,
+            FOREIGN KEY(day_id) REFERENCES study_days(id) ON DELETE CASCADE
+        )
+    ''')
+    
+    # 3. Dynamic Student Profiles
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS student_profiles (
+            username TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            points INTEGER DEFAULT 0,
+            level INTEGER DEFAULT 1
+        )
+    ''')
+    
+    # 4. Global App Configuration Settings
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS app_state (
+            id INTEGER PRIMARY KEY,
+            current_active_day_id INTEGER
+        )
+    ''')
+    
+    # Seed data if tables are freshly created
+    cursor.execute("SELECT COUNT(*) FROM student_profiles")
     if cursor.fetchone()[0] == 0:
-        sample_days = [
-            (1, "Day 1: Introduction to Joshua", "Read Joshua 1:1-9 together. Focus on courage.", 0, 0),
-            (2, "Day 2: Spies in Jericho", "Read Joshua 2. Rahab hides the two Israelite spies.", 1, 0),
-            (3, "Day 3: Crossing the Jordan", "Read Joshua 3. The water stops when the priests step in.", 1, 0)
-        ]
-        cursor.executemany('''
-            INSERT INTO study_days (day_number, title, content, is_locked, request_pending)
-            VALUES (?, ?, ?, ?, ?)
-        ''', sample_days)
+        cursor.execute("INSERT INTO student_profiles VALUES ('jude', 'Jude', 450, 4)")
+        cursor.execute("INSERT INTO student_profiles VALUES ('beau', 'Beau', 250, 2)")
+        
+        # Base Seed Day
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, is_locked)
+            VALUES (1, 'Day 1: Joshua & Courage', 'Joshua 1:9 - "Be strong and courageous..."', 'Joshua', 'Encourage someone today when they are working hard!', 0)
+        ''')
+        day_id = cursor.lastrowid
+        
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (day_id, "He was Moses' trusted assistant."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (day_id, "He led the Israelites across Jordan."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (day_id, "Read Joshua Chapter 1 out loud."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (day_id, "Explain what a successor is."))
+        
+        cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (day_id,))
         conn.commit()
+        
     conn.close()
 
 init_db()
 
-# ========================================================
-# 4. YOUR ORIGINAL LOGIN ROUTES (UNTOUCHED)
-# ========================================================
+PASSWORD_DATABASE = {"admin": "liam123", "parent": "parents2026", "student": "bibleheroes"}
+
 @app.route('/')
 def home():
     return render_template('login.html')
@@ -115,35 +101,114 @@ def handle_login():
     password = request.form.get('password')
     if password == PASSWORD_DATABASE.get(role):
         return redirect(url_for(role))
-    else:
-        return "<h1>Incorrect Password!</h1><p><a href='/'>Go back and try again.</a></p>"
+    return "<h1>Incorrect Password!</h1><p><a href='/'>Go back and try again.</a></p>"
 
+# ========================================================
+# VIEWS & ACCESS RULES
+# ========================================================
 @app.route('/student')
 def student():
-    return render_template('student.html', data=DAILY_CONTENT)
-
-# ========================================================
-# 5. UPDATED ACCESSIBLE VIEWS (PASSING BOTH DICT & DATABASE)
-# ========================================================
-@app.route('/admin')
-def admin():
     conn = get_db_connection()
-    days = conn.execute('SELECT * FROM study_days ORDER BY day_number ASC').fetchall()
+    active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
+    day_id = active_day_row['current_active_day_id']
+    
+    day_data = conn.execute('SELECT * FROM study_days WHERE id = ?', (day_id,)).fetchone()
+    facts = conn.execute('SELECT * FROM character_facts WHERE day_id = ?', (day_id,)).fetchall()
+    profiles = conn.execute('SELECT * FROM student_profiles').fetchall()
     conn.close()
-    # Passes your original daily content dictionary AS WELL AS the database days!
-    return render_template('admin.html', data=DAILY_CONTENT, days=days)
+    
+    return render_template('student.html', day=day_data, facts=facts, profiles=profiles)
 
 @app.route('/parent')
 def parent():
     conn = get_db_connection()
     days = conn.execute('SELECT * FROM study_days ORDER BY day_number ASC').fetchall()
+    profiles = conn.execute('SELECT * FROM student_profiles').fetchall()
     conn.close()
-    # Passes your original daily content dictionary AS WELL AS the database days!
-    return render_template('parent.html', data=DAILY_CONTENT, days=days)
+    return render_template('parent.html', days=days, profiles=profiles)
+
+@app.route('/admin')
+def admin():
+    conn = get_db_connection()
+    days = conn.execute('SELECT * FROM study_days ORDER BY day_number ASC').fetchall()
+    profiles = conn.execute('SELECT * FROM student_profiles').fetchall()
+    active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
+    current_day_id = active_day_row['current_active_day_id'] if active_day_row else None
+    
+    # Get text notes for whichever day is current
+    notes = conn.execute('SELECT * FROM liam_notes WHERE day_id = ?', (current_day_id,)).fetchall()
+    conn.close()
+    return render_template('admin.html', days=days, profiles=profiles, current_day_id=current_day_id, notes=notes)
 
 # ========================================================
-# 6. NEW INTERACTION ROUTE HANDLERS
+# DATA MODIFICATION HANDLERS (REWARDS & LESSONS)
 # ========================================================
+@app.route('/admin/reward/<username>', methods=['POST'])
+def award_xp(username):
+    xp_amount = int(request.form.get('xp', 50))
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM student_profiles WHERE username = ?', (username,)).fetchone()
+    if user:
+        new_xp = user['points'] + xp_amount
+        new_level = user['level']
+        # Calculate level up threshold milestones
+        if new_xp >= (new_level * 150):
+            new_level += 1
+        conn.execute('UPDATE student_profiles SET points = ?, level = ? WHERE username = ?', (new_xp, new_level, username))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/set_active_day', methods=['POST'])
+def set_active_day():
+    day_id = request.form.get('day_id')
+    conn = get_db_connection()
+    conn.execute('UPDATE app_state SET current_active_day_id = ? WHERE id = 1', (day_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/add_day', methods=['POST'])
+def add_day():
+    day_num = request.form.get('day_number')
+    title = request.form.get('title')
+    verse = request.form.get('verse')
+    char_name = request.form.get('character_name')
+    mission = request.form.get('kids_mission')
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, is_locked)
+            VALUES (?, ?, ?, ?, ?, 1)
+        ''', (day_num, title, verse, char_name, mission))
+        day_id = cursor.lastrowid
+        
+        # Handle dynamic entry arrays split by lines
+        for fact in request.form.get('facts', '').split('\n'):
+            if fact.strip():
+                cursor.execute('INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)', (day_id, fact.strip()))
+        for note in request.form.get('notes', '').split('\n'):
+            if note.strip():
+                cursor.execute('INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)', (day_id, note.strip()))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass # Prevents duplicate day numbers from crashing database initialization pipelines
+    finally:
+        conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/delete_day/<int:day_id>', methods=['POST'])
+def delete_day(day_id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM study_days WHERE id = ?', (day_id,))
+    conn.execute('DELETE FROM character_facts WHERE day_id = ?', (day_id,))
+    conn.execute('DELETE FROM liam_notes WHERE day_id = ?', (day_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
 @app.route('/request_access/<int:day_id>', methods=['POST'])
 def request_access(day_id):
     conn = get_db_connection()
