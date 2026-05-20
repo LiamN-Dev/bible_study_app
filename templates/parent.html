@@ -2,85 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Parent Portal Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal Bridge</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 750px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
-        .header { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .profile-stat { background: #0f172a; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 5px; color: #e2e8f0; border: 1px solid #334155; }
-        .badge-span { display: inline-block; background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin: 3px; font-weight: bold; border: 1px solid #2563eb; }
-        .day-row { background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #334155; border-left: 5px solid #475569; }
-        .status-locked { border-left-color: #ef4444; }
-        .status-unlocked { border-left-color: #10b981; }
-        .btn-action { background: #2e7d32; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: none; text-align: center; display: inline-block; }
-        .btn-praise { background: linear-gradient(135deg, #fbc02d, #f57f17); color: #0f172a; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; transition: transform 0.1s; }
-        .btn-praise:active { transform: scale(0.97); }
-        @media (min-width: 600px) { .btn-action { width: auto; margin-top: 0; } .day-row { display: flex; justify-content: space-between; align-items: center; } }
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, sans-serif; padding: 2rem; margin:0; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #334155; }
+        .row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 1rem 0; }
+        .row:last-child { border: none; }
+        .btn { padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-praise { background: #ec4899; color: white; }
+        .btn-view { background: #3b82f6; color: white; }
+        .btn-req { background: #f59e0b; color: black; }
+        .status { font-weight: bold; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 4px; }
+        .status-locked { background: #7f1d1d; color: #fca5a5; }
+        .status-open { background: #064e3b; color: #a7f3d0; }
+        .flash { background: #10b981; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="header" style="position: relative; display: flex; justify-content: space-between; align-items: center; wrap: wrap; gap: 10px;">
-        <div>
-            <h1 style="margin:0; font-size:1.6rem;">☀️ Summer Bible Study: Parent Hub</h1>
-        </div>
-        <a href="/" style="background: rgba(255,255,255,0.15); color: white; text-decoration: none; padding: 6px 14px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.25); transition: background 0.2s;">
-            🚪 Log Out
-        </a>
-    </div>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}<div class="flash">{{ msg }}</div>{% endfor %}
+            {% endif %}
+        {% endwith %}
 
-    <h2 style="font-size:1.2rem; margin-bottom:12px; color:#38bdf8;">👦 Kid Standings & Achievements</h2>
-    <div class="grid">
-        {% for p in profiles %}
+        <h1 style="color: #38bdf8;">🏡 Parent Takeaway Center Dashboard</h1>
+        
         <div class="card">
-            <div>
-                <strong style="font-size:1.2rem; color:#fbc02d;">{{ p['display_name'] }}</strong>
-                <div class="profile-stat">Level {{ p['level'] }} · <span style="color:#10b981;">{{ p['points'] }} XP</span></div>
-                <div style="margin-top:8px; font-size:0.9rem; color:#cbd5e1;">
-                    ⭐ Received Praises: <strong>{{ p['praise_count'] }}</strong>
+            <h2 style="margin-top:0;">Encouragement & Praise Center</h2>
+            {% for p in profiles %}
+                <div class="row">
+                    <div>
+                        <strong style="font-size: 1.2rem;">{{ p.display_name }}</strong> 
+                        <span style="color:#94a3b8; margin-left: 1rem;">Level {{ p.level }} | Wallet Balance: {{ p.points }} 💰 | Praise Count: ❤️ {{ p.praise_count }}</span>
+                    </div>
+                    <form action="/parent/praise/{{ p.username }}" method="POST">
+                        <button type="submit" class="btn btn-praise">Tap to Send Praise ❤️</button>
+                    </form>
                 </div>
-                <div style="margin-top:10px;">
-                    {% for b in p['badges'] %}
-                        <span class="badge-span" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</span>
-                    {% else %}
-                        <span style="font-size:0.85rem; color:#64748b; font-style:italic;">No badges assigned yet</span>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <form action="/parent/praise/{{ p['username'] }}" method="POST">
-                <button type="submit" class="btn-praise">👍 Send Encouragement Star</button>
-            </form>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <h2 style="font-size:1.2rem; margin-bottom:12px; color:#38bdf8;">📅 Study Pipeline</h2>
-    {% for day in days %}
-        <div class="day-row {{ 'status-locked' if day['is_locked'] else 'status-unlocked' }}">
-            <div>
-                <strong style="color:#f8fafc;">Day {{ day['day_number'] }}: {{ day['title'] }}</strong>
-                <p style="margin:5px 0 0 0; font-size:0.9rem; color:#94a3b8;">
-                    {% if not day['is_locked'] %} <span style="color:#10b981; font-weight:bold;">🔓 Unlocked - Click to open overview</span> {% else %} 🔒 Locked Archive Module {% endif %}
-                </p>
-            </div>
-            <div>
-                {% if day['is_locked'] %}
-                    {% if day['request_pending'] == 0 %}
-                        <form action="{{ url_for('request_access', day_id=day['id']) }}" method="POST">
-                            <button type="submit" class="btn-action" style="background:#ef4444;">Request View</button>
-                        </form>
-                    {% else %}
-                        <span style="color:#fbbf24; font-size:0.9rem; font-weight:bold;">⏳ Pending Access Approval</span>
-                    {% endif %}
-                {% else %}
-                    <a href="/parent/day/{{ day['id'] }}" class="btn-action" style="background:#10b981;">Open Overview →</a>
-                {% endif %}
-            </div>
+        <div class="card">
+            <h2>Course Modules Syllabus</h2>
+            {% for day in days %}
+                <div class="row">
+                    <div>
+                        <span style="font-weight: bold; color: #94a3b8; margin-right: 0.5rem;">Day {{ day.day_number }}:</span>
+                        <strong>{{ day.title }}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        {% if day.is_locked %}
+                            <span class="status status-locked">🔒 Module Archived</span>
+                            {% if day.request_pending %}
+                                <span style="color:#f59e0b; font-size:0.9rem;">Pending Request Sent</span>
+                            {% else %}
+                                <form action="/request_access/{{ day.id }}" method="POST">
+                                    <button type="submit" class="btn btn-req">Request Admin Unlock</button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <span class="status status-open">🔓 Active & Clear</span>
+                            <a href="/parent/day/<span class="highlight">{{ day.id }}</span>" class="btn btn-view">Open Guide</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
+    </div>
 </body>
 </html>
