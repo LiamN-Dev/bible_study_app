@@ -3,149 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Commander Terminal</title>
+    <title>Liam's Operation Deck - Bible Study Admin</title>
     <style>
-        body { background: #0b0f17; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 2rem; margin: 0; }
-        .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; }
-        .card { background: #111827; border: 1px solid #1f2937; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; }
-        h2 { color: #38bdf8; margin-top: 0; border-bottom: 1px solid #1f2937; padding-bottom: 0.5rem; }
-        input, textarea, select { width: 100%; padding: 0.6rem; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem; }
-        button { background: #2563eb; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #1d4ed8; }
-        .btn-danger { background: #dc2626; }
-        .btn-danger:hover { background: #b91c1c; }
-        .btn-lock { background: #4b5563; }
-        .btn-unlock { background: #d97706; }
-        .row-item { display: flex; justify-content: space-between; align-items: center; background: #1f2937; padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; }
-        .flash { background: #10b981; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #090d16; color: #f1f5f9; max-width: 900px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
+        .admin-banner { background: linear-gradient(135deg, #1e3a8a, #0f172a); border: 2px solid #2563eb; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 768px) { .grid-layout { grid-template-columns: 1.2fr 0.8fr; } }
+        .deck-card { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-bottom: 20px; }
+        .student-row { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #1f2937; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #3b82f6; }
+        .btn-panel { display: flex; gap: 6px; }
+        button { font-weight: bold; padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.1s; }
+        .btn-add { background: #10b981; color: #000; }
+        .btn-sub { background: #ef4444; color: #fff; }
+        input[type="number"], select { background: #0f172a; border: 1px solid #374151; color: white; padding: 8px; border-radius: 6px; }
+        .economy-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .economy-table th, .economy-table td { border: 1px solid #374151; padding: 10px; text-align: left; }
+        .economy-table th { background: #1f2937; color: #38bdf8; }
+        h2 { color: #38bdf8; font-size: 1.4rem; margin-top: 0; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
-    <div style="max-width:1400px; margin: 0 auto 1.5rem auto;">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for msg in messages %}<div class="flash">{{ msg }}</div>{% endfor %}
-            {% endif %}
-        {% endwith %}
-        <h1 style="color: #38bdf8; margin:0;">🕹️ Admin Core Command Matrix Room</h1>
+
+    <div class="admin-banner">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8rem; letter-spacing: 0.5px;">⚡ B-Stream Command Center</h1>
+            <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 0.95rem;">System Administrator: <strong>Liam Nystrom</strong></p>
+        </div>
+        <a href="/" style="background: rgba(239, 68, 68, 0.2); color: #f87171; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.4);">🚪 Log Out</a>
     </div>
 
-    <div class="layout">
+    <div class="grid-layout">
         <div>
-            <div class="card">
-                <h2>Set Live Course Module</h2>
-                <form action="/admin/set_active_day" method="POST" style="display:flex; gap:1rem;">
-                    <select name="day_id">
-                        {% for d in days %}
-                            <option value="{{ d['id'] }}" {% if current_day_id == d['id'] %}selected{% endif %}>Day {{ d['day_number'] }}: {{ d['title'] }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" style="height: 40px;">Activate Tracks</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Manage Player Entity Properties</h2>
+            <div class="deck-card">
+                <h2>👦 Student Profile Overrides</h2>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 15px;">Manually control base campaign elements, rewards, and structural points.</p>
+                
                 {% for p in profiles %}
-                    <div style="background:#1f2937; padding:1rem; border-radius:8px; margin-bottom:1rem; border:1px solid #374151;">
-                        <h4 style="margin:0 0 0.5rem 0; font-size:1.1rem; color:#f59e0b;">{{ p['display_name'] }} (Lv.{{ p['level'] }})</h4>
-                        <p style="margin:0 0 1rem 0; font-size:0.85rem; color:#94a3b8;">Wallet: {{ p['points'] }} pts | Lifetime XP: {{ p['total_xp'] }} | Praises: {{ p['praise_count'] }}</p>
-                        
-                        <form action="/admin/reward/{{ p['username'] }}" method="POST" style="display:inline-flex; gap:0.5rem; margin-bottom:0.5rem;">
-                            <input type="number" name="xp" value="50" style="width:70px; margin:0; padding:0.3rem;">
-                            <button type="submit">Modify XP/Wallet</button>
-                        </form>
-
-                        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
-                            <form action="/admin/adjust_praise/{{ p['username'] }}/add" method="POST"><button type="submit" style="background:#ec4899; padding:0.3rem 0.6rem;">+ Praise</button></form>
-                            <form action="/admin/adjust_praise/{{ p['username'] }}/remove" method="POST"><button type="submit" style="background:#6b7280; padding:0.3rem 0.6rem;">- Praise</button></form>
+                <div class="student-row">
+                    <div>
+                        <strong style="font-size: 1.1rem;">{{ p['display_name'] }}</strong>
+                        <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+                            ⭐ Stars: <span id="admin-stars-{{ p['username'] }}" style="color: #fbbf24; font-weight: bold;">{{ p['praise_count'] }}</span> | 
+                            ✨ Balance: <span style="color: #10b981; font-weight: bold;">{{ p['points'] }} XP</span>
                         </div>
-
-                        <form action="/admin/award_badge/{{ p['username'] }}" method="POST" style="display:flex; gap:0.5rem; margin:0;">
-                            <input type="text" name="badge_name" placeholder="Badge Title" style="margin:0; padding:0.3rem;" required>
-                            <input type="text" name="emoji" placeholder="⚔️" style="width:50px; margin:0; padding:0.3rem;" required>
-                            <button type="submit" style="background:#10b981;">Gift Item</button>
-                        </form>
                     </div>
-                {% endfor %}
-            </div>
-
-            <div class="card">
-                <h2>Teaching Field Log Notebook Archive</h2>
-                {% if notes_by_day %}
-                    {% for d_id, group in notes_by_day.items() %}
-                        <details style="background:#1f2937; margin-bottom:0.5rem; padding:0.5rem; border-radius:4px;">
-                            <summary style="cursor:pointer; font-weight:bold; color:#38bdf8;">{{ group['title'] }}</summary>
-                            <ul style="margin: 0.5rem 0 0 0; padding-left: 1.25rem;">
-                                {% for item in group['items'] %}
-                                    <li style="font-size:0.95rem; margin-bottom:0.25rem;">{{ item }}</li>
-                                {% endfor %}
-                            </ul>
-                        </details>
-                    {% endfor %}
-                {% else %}
-                    <p style="color:#6b7280;">No instruction log files populated into database schema engine.</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <div>
-            <div class="card">
-                <h2>Generate Course Curriculum Tracks</h2>
-                <form action="/admin/add_day" method="POST">
-                    <label>Day Reference Number Index:</label>
-                    <input type="number" name="day_number" placeholder="e.g. 3" required>
                     
-                    <label>Module Lesson Header Title:</label>
-                    <input type="text" name="title" placeholder="e.g. Day 3: The Giant Slingshot Battle" required>
-                    
-                    <label>Scripture Target Navigation Address:</label>
-                    <input type="text" name="verse" placeholder="e.g. 1 Samuel 17:45" required>
-                    
-                    <label>Primary Character Identity:</label>
-                    <input type="text" name="character_name" placeholder="e.g. David & Goliath" required>
-                    
-                    <label>Evening Kids Mission Quest Challenge:</label>
-                    <textarea name="kids_mission" rows="2" placeholder="Write the quest challenge rules for the students..." required></textarea>
-                    
-                    <label>Parent Core Evaluation Takeaway Briefing:</label>
-                    <textarea name="parent_takeaway" rows="2" placeholder="Write evaluation markers for checking at home..."></textarea>
-                    
-                    <label>Dynamic Facts Entry Matrix (One Fact per Line):</label>
-                    <textarea name="facts" rows="3" placeholder="Fact 1&#10;Fact 2"></textarea>
-                    
-                    <label>Private Operations Guide Notes (One Note per Line):</label>
-                    <textarea name="notes" rows="3" placeholder="Rule 1&#10;Rule 2"></textarea>
-                    
-                    <button type="submit" style="width:100%; background:#10b981;">Commit Track to Database</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Syllabus Node Access Board</h2>
-                {% for d in days %}
-                    <div class="row-item">
-                        <div style="max-width: 60%;">
-                            <strong>Day {{ d['day_number'] }}: {{ d['title'] }}</strong>
-                            {% if d['request_pending'] %}
-                                <div style="color:#f59e0b; font-size:0.8rem; font-weight:bold;">⚠️ ACCESS REQUEST INCOMING FROM PARENTS</div>
-                            {% endif %}
-                        </div>
-                        <div style="display:flex; gap:0.4rem;">
-                            {% if d['is_locked'] %}
-                                <form action="/unlock_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-unlock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔓 Grant Unlock</button></form>
-                            {% else %}
-                                <form action="/lock_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-lock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔒 Lock Down</button></form>
-                            {% endif %}
-                            
-                            <form action="/admin/delete_day/{{ d['id'] }}" method="POST" onsubmit="return confirm('Expunge this data node permanently? This cannot be undone.');">
-                                <button type="submit" class="btn-danger" style="padding:0.4rem 0.7rem; font-size:0.85rem;">Expunge Node</button>
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        <div class="btn-panel">
+                            <span style="font-size: 0.8rem; align-self: center; margin-right: 4px; color: #cbd5e1;">Stars:</span>
+                            <form class="star-adjust-form" action="/admin/adjust_stars/{{ p['username'] }}/add" method="POST" data-username="{{ p['username'] }}" data-delta="1" style="margin:0;">
+                                <button type="submit" class="btn-add" style="padding: 4px 10px; font-size: 0.8rem;">+1 ⭐</button>
+                            </form>
+                            <form class="star-adjust-form" action="/admin/adjust_stars/{{ p['username'] }}/remove" method="POST" data-username="{{ p['username'] }}" data-delta="-1" style="margin:0;">
+                                <button type="submit" class="btn-sub" style="padding: 4px 10px; font-size: 0.8rem;">-1 🗑️</button>
                             </form>
                         </div>
+                        
+                        <form action="/admin/adjust_xp/{{ p['username'] }}" method="POST" style="margin:0; display:flex; gap:4px;">
+                            <input type="number" name="xp_amount" placeholder="XP Amt" style="width: 75px; font-size: 0.8rem; padding: 4px;" required>
+                            <button type="submit" name="action" value="add" class="btn-add" style="padding: 4px 8px; font-size: 0.8rem;">+ XP</button>
+                            <button type="submit" name="action" value="deduct" class="btn-sub" style="padding: 4px 8px; font-size: 0.8rem;">- XP</button>
+                        </form>
                     </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
+
+        <div>
+            <div class="deck-card" style="border-color: #fbc02d;">
+                <h2 style="color: #fbc02d;">💎 Sandbox XP Menu</h2>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: -10px;">Official campaign valuation guidelines for custom server perks.</p>
+                
+                <table class="economy-table">
+                    <thead>
+                        <tr><th>Store Reward Item</th><th>Cost</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>🎁 Mystery Loot Box</td><td><strong style="color: #fbc02d;">350 XP</strong></td></tr>
+                        <tr><td>🏷️ Custom Player Title</td><td><strong style="color: #fbc02d;">750 XP</strong></td></tr>
+                        <tr><td>🎨 Custom Profile Theme</td><td><strong style="color: #fbc02d;">1,000 XP</strong></td></tr>
+                        <tr><td>💬 Custom Emoji pack</td><td><strong style="color: #fbc02d;">1,250 XP</strong></td></tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 20px; font-size: 1rem; color: #e2e8f0;">⚡ Quick Store Purchase Processor</h3>
+                <form action="/admin/process_purchase" method="POST" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Select Target Profile:</label>
+                    <select name="username" required>
+                        {% for p in profiles %}
+                            <option value="{{ p['username'] }}">{{ p['display_name'] }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Select Purchased Perk:</label>
+                    <select name="reward_item" required>
+                        <option value="lootbox|350">Mystery Loot Box (-350 XP)</option>
+                        <option value="title|750">Custom Player Title (-750 XP)</option>
+                        <option value="theme|1000">Custom Profile Theme (-1000 XP)</option>
+                        <option value="emoji|1250">Custom Emoji Pack (-1250 XP)</option>
+                    </select>
+
+                    <button type="submit" class="btn-add" style="background: #fbc02d; color: #000; margin-top: 5px;">Execute Transaction</button>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.star-adjust-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = this.getAttribute('data-username');
+                const delta = parseInt(this.getAttribute('data-delta'));
+                const targetLabel = document.getElementById(`admin-stars-${username}`);
+                
+                targetLabel.innerText = Math.max(0, parseInt(targetLabel.innerText) + delta);
+
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
