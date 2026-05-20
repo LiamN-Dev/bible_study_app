@@ -3,60 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bible Heroes Academy</title>
+    <title>Summer Bible Study - Student Dashboard</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 650px; margin: 0 auto; padding: 15px; padding-bottom: 60px; }
-        .hero-banner { background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 30px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin-bottom: 25px; }
+        .hero-banner { background: linear-gradient(135deg, #2e7d32, #1b5e20); padding: 30px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px rgba(0,0,0,0.3); margin-bottom: 25px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .rank-badge { background: #3b82f6; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85rem; display: inline-block; margin-bottom: 8px; }
-        .xp-bar { background: #0f172a; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .xp-progress { background: #10b981; height: 100%; width: 65%; border-radius: 5px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
+        .rank-badge { background: #2e7d32; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85rem; display: inline-block; margin-bottom: 8px; width: fit-content; }
+        .praise-glow { display: inline-block; background: #fef3c7; color: #b45309; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; }
         .badge-box { display: inline-flex; align-items: center; background: #334155; padding: 6px 12px; border-radius: 20px; margin: 4px; border: 1px solid #475569; font-size: 0.9rem; }
-        .mission-box { background: #1e1b4b; border: 2px dashed #6366f1; border-radius: 16px; padding: 20px; text-align: center; margin-top: 20px; }
+        .mission-box { background: #064e3b; border: 2px dashed #10b981; border-radius: 16px; padding: 20px; text-align: center; margin-top: 20px; }
+        .btn-shop { background: #fbc02d; color: #0f172a; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; font-size: 0.85rem; }
+        .btn-shop:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
         h2 { color: #38bdf8; font-size: 1.3rem; margin-top: 0; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
     <div class="hero-banner">
-        <span style="font-size: 3rem;">⚔️</span>
-        <h1 style="margin: 10px 0 0 0; font-size: 1.8rem; letter-spacing: 0.5px;">Bible Heroes Academy</h1>
-        <p style="margin: 5px 0 0 0; color: #bfdbfe; font-size: 1rem;">Welcome to the Training Grounds</p>
+        <span style="font-size: 3rem;">☀️</span>
+        <h1 style="margin: 10px 0 0 0; font-size: 1.8rem; letter-spacing: 0.5px;">Summer Bible Study</h1>
+        <p style="margin: 5px 0 0 0; color: #c8e6c9; font-size: 1rem;">Student Campaign Dashboard</p>
     </div>
 
-    <!-- STUDENT HERO PROFILES -->
-    <h2 style="font-size: 1.2rem; padding-left: 5px;">🔥 Hero Roster & Progress</h2>
+    <h2 style="font-size: 1.2rem; padding-left: 5px;">🔥 Study Roster</h2>
     <div class="grid">
         {% for p in profiles %}
         <div class="card">
-            <div class="rank-badge">LVL {{ p['level'] }}</div>
-            <strong style="display: block; font-size: 1.2rem; color: white; margin-bottom: 5px;">{{ p['display_name'] }}</strong>
-            <span style="color: #10b981; font-weight: bold; font-size: 0.9rem;">✨ {{ p['points'] }} Total XP</span>
-            
-            <div style="margin-top: 15px;">
-                <span style="font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 5px;">Earned Badges:</span>
-                {% for b in p['badges'] %}
-                    <div class="badge-box" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</div>
-                {% else %}
-                    <span style="font-size: 0.8rem; color: #64748b; font-style: italic;">No badges achieved yet!</span>
-                {% endfor %}
+            <div>
+                <div class="rank-badge">LVL {{ p['level'] }}</div>
+                
+                {% if p['praise_count'] > 0 %}
+                    <div class="praise-glow">⭐ Parent Praised x{{ p['praise_count'] }}</div>
+                {% endif %}
+                
+                <strong style="display: block; font-size: 1.2rem; color: white; margin-bottom: 5px;">{{ p['display_name'] }}</strong>
+                <span style="color: #10b981; font-weight: bold; font-size: 0.9rem;">✨ {{ p['points'] }} Total XP</span>
+                
+                <div style="margin-top: 12px;">
+                    <span style="font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 5px;">Inventory Items:</span>
+                    {% for b in p['badges'] %}
+                        <div class="badge-box" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</div>
+                    {% else %}
+                        <span style="font-size: 0.8rem; color: #64748b; font-style: italic;">No items achieved yet!</span>
+                    {% endfor %}
+                </div>
             </div>
+
+            <form action="/student/buy_lootbox/{{ p['username'] }}" method="POST">
+                {% if p['points'] >= 500 %}
+                    <button type="submit" class="btn-shop">🎁 Buy Mystery Loot Box (500 XP)</button>
+                {% else %}
+                    <button type="button" class="btn-shop" disabled>🔒 Need 500 XP for Box</button>
+                {% endif %}
+            </form>
         </div>
         {% endfor %}
     </div>
 
-    <!-- ACTIVE LESSON AREA -->
+    {% if day %}
     <div class="card" style="border-left: 5px solid #38bdf8;">
-        <h2>📖 Active Mission Intel: {{ day['title'] }}</h2>
+        <h2>📖 Active Mission: {{ day['title'] }}</h2>
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155;">
-            <strong style="color: #f59e0b; font-size: 0.9rem; display: block; margin-bottom: 5px;">🎯 CORE VERSE MEMORY TARGET:</strong>
+            <strong style="color: #fbc02d; font-size: 0.9rem; display: block; margin-bottom: 5px;">🎯 MEMORY VERSE TARGET:</strong>
             <p style="margin: 0; font-size: 1.1rem; font-style: italic; color: #e2e8f0; line-height: 1.4;">"{{ day['verse'] }}"</p>
         </div>
 
-        <strong style="color: #38bdf8; font-size: 0.95rem; display: block; margin-bottom: 8px;">🛡️ Character Profile: {{ day['character_name'] }}</strong>
+        <strong style="color: #38bdf8; font-size: 0.95rem; display: block; margin-bottom: 8px;">🛡️ Character Focus: {{ day['character_name'] }}</strong>
         <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 1.5;">
             {% for fact in facts %}
                 <li style="margin-bottom: 8px;">{{ fact['fact_text'] }}</li>
@@ -64,11 +79,17 @@
         </ul>
     </div>
 
-    <!-- DAILY MISSION CAMPAIGN -->
     <div class="mission-box">
-        <h3 style="margin: 0 0 8px 0; color: #818cf8; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Action Objective</h3>
-        <p style="margin: 0; font-size: 1.2rem; color: #e0e7ff; font-weight: 500;">{{ day['kids_mission'] }}</p>
+        <h3 style="margin: 0 0 8px 0; color: #a7f3d0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Daily Action Objective</h3>
+        <p style="margin: 0; font-size: 1.2rem; color: #e0f2fe; font-weight: 500;">{{ day['kids_mission'] }}</p>
     </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 40px 20px;">
+        <span style="font-size: 2.5rem;">🛌</span>
+        <h3 style="margin: 10px 0 0 0; color: #94a3b8;">No Active Mission Configured</h3>
+        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">Check back once Liam opens the daily study module!</p>
+    </div>
+    {% endif %}
 
 </body>
 </html>
