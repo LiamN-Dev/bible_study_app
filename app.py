@@ -3,13 +3,13 @@ import random
 from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response, flash
 
 app = Flask(__name__)
-app.secret_key = "bible_study_secret_key_2026" # Required for flash messages
+# FIX 1: Added secret key to prevent 500 error when using flash messages in templates
+app.secret_key = "bible_study_secret_key_2026" 
 DB_FILE = "bible_study.db"
 
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
-    # CRITICAL FIX: Turn on Foreign Key support explicitly for cascading deletes
-    conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA foreign_keys = ON;") # Enforces clean cascading deletions
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -52,7 +52,7 @@ def init_db():
         )
     ''')
     
-    # 4. Student Profiles Table (Upgraded with persistent total_xp to prevent level loss)
+    # 4. Student Profiles Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_profiles (
             username TEXT PRIMARY KEY,
@@ -60,10 +60,7 @@ def init_db():
             points INTEGER DEFAULT 0,
             total_xp INTEGER DEFAULT 0,
             level INTEGER DEFAULT 1,
-            praise_count INTEGER DEFAULT 0,
-            name_color TEXT DEFAULT '#ffffff',
-            name_style TEXT DEFAULT 'normal',
-            player_title TEXT DEFAULT ''
+            praise_count INTEGER DEFAULT 0
         )
     ''')
 
@@ -76,6 +73,7 @@ def init_db():
         cursor.execute("ALTER TABLE student_profiles ADD COLUMN name_style TEXT DEFAULT 'normal'")
     if 'player_title' not in columns:
         cursor.execute("ALTER TABLE student_profiles ADD COLUMN player_title TEXT DEFAULT ''")
+    # FIX 2: Add total_xp column dynamically if it doesn't exist yet
     if 'total_xp' not in columns:
         cursor.execute("ALTER TABLE student_profiles ADD COLUMN total_xp INTEGER DEFAULT 0")
     
@@ -98,7 +96,7 @@ def init_db():
         )
     ''')
     
-    # Seed initial profiles and data if empty
+    # Seed profiles and initial configurations if completely empty
     cursor.execute("SELECT COUNT(*) FROM student_profiles")
     if cursor.fetchone()[0] == 0:
         cursor.execute("INSERT INTO student_profiles (username, display_name, points, total_xp, level, praise_count) VALUES ('jude', 'Jude', 0, 0, 1, 0)")
@@ -106,25 +104,21 @@ def init_db():
         
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (1, 'The Sword Boot Camp', 'Genesis 1:1', 'The Bible / Navigation', 
+            VALUES (1, 'Day 1: The Sword Boot Camp', 'Genesis 1:1', 'The Bible / Navigation', 
                     'Draw your swords! Practice finding Genesis 1:1 three times at home today.', 
                     'We learned the 2-Minute Map Tour (Old vs New Testament) and how chapters/verses work like a GPS address.', 0)
         ''')
         d1_id = cursor.lastrowid
         cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d1_id, "The Bible is a library of 66 separate books bound together."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d1_id, "The Old Testament is the front 3/4; the New Testament is the back 1/4."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "Map Tour: Front 3/4 is Old Testament, back 1/4 is New Testament."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "Game Rules: Hold Bibles flat on palms above heads. Shout 'Draw your swords!'"))
 
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (2, 'Creation & The Sneaky Snake', 'Genesis 1:1 & Genesis 3:1', 'Adam, Eve & The Snake', 
+            VALUES (2, 'Day 2: Creation & The Sneaky Snake', 'Genesis 1:1 & Genesis 3:1', 'Adam, Eve & The Snake', 
                     'If you could ask God to create one brand new animal right now, what would it look like?', 
-                    'We covered Genesis 1 and 3 today—how God made a perfect world, and how sin entered through a trick.', 1)
+                    'We covered Genesis 1 and 3 today.', 1)
         ''')
         d2_id = cursor.lastrowid
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d2_id, "God speaks and creates everything out of absolutely nothing."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Sword Drill Challenge: Race to find Genesis 1:1 and Genesis 3:1."))
 
         cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (d1_id,))
     
@@ -362,7 +356,7 @@ def award_xp(username):
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM student_profiles WHERE username = ?', (username,)).fetchone()
     if user:
-        # Core fix: points is the wallet, total_xp calculates level milestones safely
+        # Separate spendable wallet points from lifetime milestone xp tracking
         new_points = max(0, user['points'] + xp_amount)
         new_total_xp = max(0, user['total_xp'] + xp_amount)
             
@@ -441,7 +435,6 @@ def add_day():
 @app.route('/admin/delete_day/<int:day_id>', methods=['POST'])
 def delete_day(day_id):
     conn = get_db_connection()
-    # Foreign key engine cleans up corresponding rows in liam_notes & character_facts automatically
     conn.execute('DELETE FROM study_days WHERE id = ?', (day_id,))
     
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
