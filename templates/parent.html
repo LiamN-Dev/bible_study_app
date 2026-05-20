@@ -7,37 +7,48 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 750px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
-        .header { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .header { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
         .profile-stat { background: #0f172a; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 5px; color: #e2e8f0; border: 1px solid #334155; }
-        .badge-span { display: inline-block; background: #312e81; color: #c7d2fe; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin: 3px; font-weight: bold; border: 1px solid #4338ca; }
+        .badge-span { display: inline-block; background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin: 3px; font-weight: bold; border: 1px solid #2563eb; }
         .day-row { background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #334155; border-left: 5px solid #475569; }
         .status-locked { border-left-color: #ef4444; }
         .status-unlocked { border-left-color: #10b981; }
-        .btn-action { background: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: none; text-align: center; display: inline-block; }
+        .btn-action { background: #2e7d32; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: none; text-align: center; display: inline-block; }
+        .btn-praise { background: linear-gradient(135deg, #fbc02d, #f57f17); color: #0f172a; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; transition: transform 0.1s; }
+        .btn-praise:active { transform: scale(0.97); }
         @media (min-width: 600px) { .btn-action { width: auto; margin-top: 0; } .day-row { display: flex; justify-content: space-between; align-items: center; } }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1 style="margin:0; font-size:1.6rem;">🏡 Parent Insights Portal</h1>
+        <h1 style="margin:0; font-size:1.6rem;">☀️ Summer Bible Study: Parent Hub</h1>
     </div>
 
     <h2 style="font-size:1.2rem; margin-bottom:12px; color:#38bdf8;">👦 Kid Standings & Achievements</h2>
     <div class="grid">
         {% for p in profiles %}
         <div class="card">
-            <strong style="font-size:1.1rem; color:#818cf8;">{{ p['display_name'] }}</strong>
-            <div class="profile-stat">Level {{ p['level'] }} · <span style="color:#10b981;">{{ p['points'] }} XP</span></div>
-            <div style="margin-top:10px;">
-                {% for b in p['badges'] %}
-                    <span class="badge-span" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</span>
-                {% else %}
-                    <span style="font-size:0.85rem; color:#64748b; font-style:italic;">No badges assigned yet</span>
-                {% endfor %}
+            <div>
+                <strong style="font-size:1.2rem; color:#fbc02d;">{{ p['display_name'] }}</strong>
+                <div class="profile-stat">Level {{ p['level'] }} · <span style="color:#10b981;">{{ p['points'] }} XP</span></div>
+                <div style="margin-top:8px; font-size:0.9rem; color:#cbd5e1;">
+                    ⭐ Received Praises: <strong>{{ p['praise_count'] }}</strong>
+                </div>
+                <div style="margin-top:10px;">
+                    {% for b in p['badges'] %}
+                        <span class="badge-span" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</span>
+                    {% else %}
+                        <span style="font-size:0.85rem; color:#64748b; font-style:italic;">No badges assigned yet</span>
+                    {% endfor %}
+                </div>
             </div>
+            
+            <form action="/parent/praise/{{ p['username'] }}" method="POST">
+                <button type="submit" class="btn-praise">👍 Send Encouragement Star</button>
+            </form>
         </div>
         {% endfor %}
     </div>
