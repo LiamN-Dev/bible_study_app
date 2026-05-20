@@ -48,7 +48,7 @@ def init_db():
         )
     ''')
     
-    # 4. Student Profiles Table (Fresh Seed Data!)
+    # 4. Student Profiles Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_profiles (
             username TEXT PRIMARY KEY,
@@ -58,7 +58,7 @@ def init_db():
         )
     ''')
     
-    # 5. NEW: Badges Table
+    # 5. Badges Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS badges (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,12 +122,14 @@ def handle_login():
 def student():
     conn = get_db_connection()
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
-    day_id = active_day_row['current_active_day_id']
+    day_id = active_day_row['current_active_day_id'] if active_day_row else None
     
-    day_data = conn.execute('SELECT * FROM study_days WHERE id = ?', (day_id,)).fetchone()
-    facts = conn.execute('SELECT * FROM character_facts WHERE day_id = ?', (day_id,)).fetchall()
-    
-    # Fetch student listings alongside earned achievements
+    day_data = None
+    facts = []
+    if day_id:
+        day_data = conn.execute('SELECT * FROM study_days WHERE id = ?', (day_id,)).fetchone()
+        facts = conn.execute('SELECT * FROM character_facts WHERE day_id = ?', (day_id,)).fetchall()
+        
     profiles_raw = conn.execute('SELECT * FROM student_profiles').fetchall()
     profiles = []
     for p in profiles_raw:
@@ -158,7 +160,6 @@ def parent_day_view(day_id):
     conn = get_db_connection()
     day = conn.execute('SELECT * FROM study_days WHERE id = ?', (day_id,)).fetchone()
     
-    # Security Rule: If a lesson is locked, parents cannot view this detail page directly
     if day and day['is_locked']:
         conn.close()
         return "<h1>🔒 Lesson Module Locked!</h1><p>You must wait for admin clearance to view these materials.</p><p><a href='/parent'>Return to Dashboard</a></p>"
@@ -182,7 +183,10 @@ def admin():
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
     current_day_id = active_day_row['current_active_day_id'] if active_day_row else None
     
-    notes = conn.execute('SELECT * FROM liam_notes WHERE day_id = ?', (current_day_id,)).fetchall()
+    notes = []
+    if current_day_id:
+        notes = conn.execute('SELECT * FROM liam_notes WHERE day_id = ?', (current_day_id,)).fetchall()
+        
     conn.close()
     return render_template('admin.html', days=days, profiles=profiles, current_day_id=current_day_id, notes=notes)
 
@@ -197,7 +201,6 @@ def award_xp(username):
     if user:
         new_xp = user['points'] + xp_amount
         new_level = user['level']
-        # Level up threshold benchmark
         if new_xp >= (new_level * 150):
             new_level += 1
         conn.execute('UPDATE student_profiles SET points = ?, level = ? WHERE username = ?', (new_xp, new_level, username))
