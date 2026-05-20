@@ -3,132 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Adventure Board</title>
+    <title>Student Dashboard - Sword Drill Heroes</title>
     <style>
-        body { background: #0b0f19; color: #e2e8f0; font-family: system-ui, sans-serif; margin: 0; padding: 2rem; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; padding-bottom: 1rem; margin-bottom: 2rem; }
-        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-        .card { background: #111827; border: 1px solid #1f2937; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; }
-        h2 { color: #38bdf8; margin-top: 0; }
-        .badge-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-        .badge-pill { background: #1f2937; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid #374151; display: inline-flex; align-items: center; }
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .shop-item { background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151; text-align: center; }
-        .shop-item button { width: 100%; background: #10b981; color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
-        .shop-item button:hover { background: #059669; }
-        .flash { background: #2563eb; color: white; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 2px solid #1e293b; margin-bottom: 30px; }
+        h1 { color: #38bdf8; margin: 0; }
+        h2 { color: #fbc02d; margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); position: relative; }
+        .lesson-card { background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 2px solid #4f46e5; border-radius: 16px; padding: 25px; margin-bottom: 30px; }
+        .rank-badge { background: #0284c7; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 8px; }
+        .praise-glow { background: #78350f; color: #fde047; border: 1px solid #ca8a04; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-left: 5px; margin-bottom: 8px; }
+        .badge-box { background: #334155; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; display: inline-block; margin: 3px; border: 1px solid #475569; }
+        .shop-card { background: #1e293b; border: 1px solid #475569; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+        .shop-cost { position: absolute; top: 15px; right: 15px; background: #10b981; color: white; font-size: 0.85rem; font-weight: bold; padding: 2px 8px; border-radius: 20px; }
+        .btn-shop { background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; transition: background 0.2s; }
+        .btn-shop:hover:not(:disabled) { background: #1d4ed8; }
+        .btn-shop:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+        .btn-logout { background: #dc2626; color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for msg in messages %}<div class="flash">{{ msg }}</div>{% endfor %}
+    <div class="container">
+        <header>
+            <div>
+                <h1>⚔️ Sword Drill Heroes</h1>
+                <p style="color: #94a3b8; margin: 5px 0 0 0;">
+                    Student Portal &middot; Active Hero: 
+                    <span style="color: {{ shopper['name_color'] if shopper['name_color'] else '#ffffff' }}; text-shadow: {{ '0 0 10px ' + shopper['name_color'] if shopper['name_style'] == 'glow' else 'none' }}; font-weight: bold;">
+                        {{ shopper['player_title'] }}{{ shopper['display_name'] }}
+                    </span>
+                </p>
+            </div>
+            <a href="/" class="btn-logout">Exit Portal</a>
+        </header>
+
+        {% if day %}
+        <div class="lesson-card">
+            <span style="color: #a5b4fc; font-weight: bold; text-transform: uppercase; font-size: 0.85rem;">Active Training Module</span>
+            <h2 style="color: white; margin: 5px 0 15px 0;">{{ day['title'] }}</h2>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; border-left: 4px solid #38bdf8; margin-bottom: 20px;">
+                <span style="color: #38bdf8; font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">🎯 TARGET SWORD DRILL VERSE:</span>
+                <strong style="font-size: 1.4rem; color: #fff;">{{ day['verse'] }}</strong>
+            </div>
+            <h3 style="color: #fbbf24; font-size: 1.1rem; margin-bottom: 10px;">🥷 Kids Mission Objective:</h3>
+            <p style="font-size: 1.1rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 25px;">{{ day['kids_mission'] }}</p>
+        </div>
         {% endif %}
-    {% endwith %}
 
-    <div class="header">
-        <div>
-            <h1>📖 Quest Track Dashboard</h1>
-            <form action="/student/change_shopper" method="POST" style="display: flex; align-items: center; gap: 0.5rem;">
-                <label>Active Profiler View:</label>
-                <select name="shopper_username" onchange="this.form.submit()" style="background:#1f2937; color:white; padding:0.4rem; border-radius:4px; border:1px solid #4b5563;">
-                    {% for p in profiles %}
-                        <option value="{{ p.username }}" {% if shopper.username == p.username %}selected{% endif %}>{{ p.display_name }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
-        <div style="text-align: right; background: #1e293b; padding: 1rem; border-radius: 8px; border: 1px solid #3b82f6;">
-            <h3 style="margin:0; color:#10b981;">Active Wallet: {{ shopper.points }} 💰 Points</h3>
-            <p style="margin:0.25rem 0 0 0; font-size:0.9rem; color:#94a3b8;">Level {{ shopper.level }} Hero | ❤️ {{ shopper.praise_count }} Praises</p>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div>
-            <div class="card" style="border-left: 5px solid #3b82f6;">
-                {% if day %}
-                    <span style="background: #2563eb; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">CURRENT LIVE TRACK</span>
-                    <h2 style="margin-top: 0.5rem;">{{ day.title }}</h2>
-                    <p style="font-size: 1.25rem; font-style: italic; color: #e2e8f0; background: #1f2937; padding: 1rem; border-radius: 6px; border-left: 4px solid #10b981;">🛡️ Verse Address: <strong>{{ day.verse }}</strong></p>
-                    <h3>Target Character Reference: <span style="color:#f59e0b;">{{ day.character_name }}</span></h3>
-                    
-                    <div style="background: #065f46; padding: 1rem; border-radius: 6px; border: 1px solid #047857;">
-                        <h4 style="margin:0 0 0.5rem 0; color:#34d399;">🚀 Tonight's Epic Kid Mission:</h4>
-                        <p style="margin:0; font-size:1.1rem;">{{ day.kids_mission }}</p>
-                    </div>
-                {% else %}
-                    <h2>No Lesson Active Currently</h2>
-                    <p>Tell the commander to assign an active lesson via the mission control room!</p>
-                {% endif %}
-            </div>
-
+        <h2>👥 The Hero Squad</h2>
+        <div class="grid">
+            {% for p in profiles %}
             <div class="card">
-                <h2>Fact Matrix Archive</h2>
-                {% if facts %}
-                    <ul>
-                    {% for fact in facts %}
-                        <li style="margin-bottom: 0.75rem; font-size: 1.05rem;">{{ fact.fact_text }}</li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="color:#6b7280;">No facts assigned to this track module.</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <div>
-            <div class="card">
-                <h3 style="margin-top:0;">🏆 Hero Standings</h3>
-                {% for prof in profiles %}
-                    <div style="padding: 0.7rem; border-bottom: 1px solid #1fr; display:flex; justify-content:space-between; align-items:center; background:#1e293b; margin-bottom:0.5rem; border-radius:6px;">
-                        <div>
-                            <span style="font-weight: bold; font-size:1.1rem; color: {{ prof.name_color }}; {% if prof.name_style == 'glow' %}text-shadow: 0 0 8px {{ prof.name_color }};{% endif %}">
-                                {{ prof.player_title }}{{ prof.display_name }}
-                            </span>
-                            <div class="badge-list">
-                                {% for badge in prof.badges %}
-                                    <span class="badge-pill" title="{{ badge.badge_name }}">{{ badge.emoji }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <span style="color:#34d399; font-weight:bold;">Lv.{{ prof.level }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-
-            <div class="card">
-                <h3 style="margin-top:0; color:#10b981;">🛒 Power Up Vault Store</h3>
-                <p style="font-size:0.85rem; color:#94a3b8; margin-top:-0.5rem;">Buying unlocks rewards directly onto your profile card character style matrix!</p>
-                
-                <div class="shop-grid">
-                    <div class="shop-item">
-                        <span>📦</span>
-                        <h4 style="margin:5px 0;">Mystery Reward Box</h4>
-                        <small style="color:#10b981; display:block;">Cost: 350 💰</small>
-                        <form action="/student/purchase_item/{{ shopper.username }}" method="POST"><input type="hidden" name="item_key" value="lootbox"><button type="submit">Roll Reward</button></form>
-                    </div>
-                    <div class="shop-item">
-                        <span>🐉</span>
-                        <h4 style="margin:5px 0;">Dragon Badge</h4>
-                        <small style="color:#10b981; display:block;">Cost: 600 💰</small>
-                        <form action="/student/purchase_item/{{ shopper.username }}" method="POST"><input type="hidden" name="item_key" value="dragon"><button type="submit">Purchase</button></form>
-                    </div>
-                    <div class="shop-item">
-                        <span>🔥</span>
-                        <h4 style="margin:5px 0;">Glow Fire Color</h4>
-                        <small style="color:#10b981; display:block;">Cost: 300 💰</small>
-                        <form action="/student/purchase_item/{{ shopper.username }}" method="POST"><input type="hidden" name="item_key" value="color_fire"><button type="submit">Unlock</button></form>
-                    </div>
-                    <div class="shop-item">
-                        <span>🥷</span>
-                        <h4 style="margin:5px 0;">[NINJA] Rank Prefix</h4>
-                        <small style="color:#10b981; display:block;">Cost: 550 💰</small>
-                        <form action="/student/purchase_item/{{ shopper.username }}" method="POST"><input type="hidden" name="item_key" value="title_ninja"><button type="submit">Unlock</button></form>
+                <div>
+                    <div class="rank-badge">LVL {{ p['level'] }}</div>
+                    {% if p['praise_count'] > 0 %}
+                        <div class="praise-glow">⭐ Parent Praised x{{ p['praise_count'] }}</div>
+                    {% endif %}
+                    <strong style="display: block; font-size: 1.3rem; margin-bottom: 5px; 
+                        color: {{ p['name_color'] if p['name_color'] else '#ffffff' }};
+                        text-shadow: {{ '0 0 10px ' + p['name_color'] if p['name_style'] == 'glow' else 'none' }};">
+                        {{ p['player_title'] }}{{ p['display_name'] }}
+                    </strong>
+                    <span style="color: #10b981; font-weight: bold; font-size: 0.9rem;">✨ {{ p['points'] }} XP Balance</span>
+                    <div style="margin-top: 10px;">
+                        {% for b in p['badges'] %}
+                            <div class="badge-box">{{ b['emoji'] }} {{ b['badge_name'] }}</div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+            {% endfor %}
+        </div>
+
+        <h2>🛒 Super Upgrades Marketplace</h2>
+        <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+            <form action="/student/change_shopper" method="POST" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <label style="font-weight: bold; color: #cbd5e1;">👥 Who is buying upgrades?</label>
+                <select name="shopper_username" onchange="this.form.submit()" style="background: #0f172a; color: white; border: 1px solid #475569; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    {% for p in profiles %}
+                        <option value="{{ p['username'] }}" {% if p['username'] == shopper['username'] %}selected{% endif %}>
+                            {{ p['display_name'] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+                <span>Current Balance for <strong style="color:{{ shopper['name_color'] }};">{{ shopper['display_name'] }}</strong>:</span>
+                <span style="color: #10b981; font-weight: bold; font-size: 1.2rem;">✨ <span id="current-shopper-points">{{ shopper['points'] }}</span> XP</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            {% for item_key, item in catalog.items() %}
+            <div class="shop-card">
+                <span class="shop-cost">{{ item['cost'] }} XP</span>
+                <div>
+                    <strong style="color: #38bdf8; font-size: 1.1rem; display: block;">{{ item['name'] if 'name' in item else item_key.capitalize() }}</strong>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin: 4px 0 10px 0;">{{ item['desc'] if 'desc' in item else 'Custom character asset bundle.' }}</p>
+                </div>
+                <form class="ajax-shop-form" action="/student/purchase_item/{{ shopper['username'] }}" method="POST">
+                    <input type="hidden" name="item_key" value="{{ item_key }}">
+                    <button type="submit" class="btn-shop" {% if shopper['points'] < item['cost'] %}disabled{% endif %}>
+                        Purchase Unlock
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.ajax-shop-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('.btn-shop');
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Processing...";
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        window.location.reload(); // Quick refresh only on successful transactions to apply styles safely
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Purchase Unlock";
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
