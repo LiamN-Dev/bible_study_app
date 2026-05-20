@@ -49,7 +49,7 @@ def init_db():
         )
     ''')
     
-    # 4. Student Profiles Table (Upgraded with Praise Count tracking)
+    # 4. Student Profiles Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_profiles (
             username TEXT PRIMARY KEY,
@@ -160,8 +160,16 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Scoring: The first person to find the verse, stand up straight, and read the first three words wins 10 points."))
 
         cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (d1_id,))
-        conn.commit()
-        
+    
+    # Fallback sanity check: Ensure app_state ALWAYS has a tracking configuration record
+    cursor.execute("SELECT COUNT(*) FROM app_state WHERE id = 1")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("SELECT id FROM study_days ORDER BY day_number ASC LIMIT 1")
+        first_day = cursor.fetchone()
+        first_day_id = first_day['id'] if first_day else None
+        cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (first_day_id,))
+
+    conn.commit()
     conn.close()
 
 init_db()
@@ -275,7 +283,6 @@ def admin():
 # ADVANCED MECHANICS ENGINE (REWORKED PRAISE & SHOP CORNER)
 # ========================================================
 
-# Parent Praise Incrementor
 @app.route('/parent/praise/<username>', methods=['POST'])
 def parent_praise(username):
     conn = get_db_connection()
@@ -284,20 +291,17 @@ def parent_praise(username):
     conn.close()
     return redirect(url_for('parent'))
 
-# NEW: Admin Praise Star Incrementor & Decrementor Ports
 @app.route('/admin/adjust_praise/<username>/<action>', methods=['POST'])
 def admin_adjust_praise(username, action):
     conn = get_db_connection()
     if action == 'add':
         conn.execute('UPDATE student_profiles SET praise_count = praise_count + 1 WHERE username = ?', (username,))
     elif action == 'remove':
-        # Prevent praise count from dropping below zero
         conn.execute('UPDATE student_profiles SET praise_count = MAX(0, praise_count - 1) WHERE username = ?', (username,))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
 
-# REWORKED: Precise Student Catalog Point Exchange
 @app.route('/student/purchase_item/<username>', methods=['POST'])
 def student_purchase_item(username):
     SHOP_CATALOG = {
@@ -329,7 +333,6 @@ def student_purchase_item(username):
     conn.close()
     return redirect(url_for('student'))
 
-# Enhanced Admin XP Porter (With level-down capabilities & floor limits)
 @app.route('/admin/reward/<username>', methods=['POST'])
 def award_xp(username):
     xp_amount = int(request.form.get('xp', 50))
@@ -389,6 +392,12 @@ def add_day():
         ''', (day_num, title, verse, char_name, mission, parent_takeaway))
         day_id = cursor.lastrowid
         
+        # If this is the first day ever being added dynamically, sync it into app_state tracking
+        cursor.execute("SELECT current_active_day_id FROM app_state WHERE id = 1")
+        current_active = cursor.fetchone()
+        if current_active and current_active['current_active_day_id'] is None:
+            cursor.execute("UPDATE app_state SET current_active_day_id = ? WHERE id = 1", (day_id,))
+        
         for fact in request.form.get('facts', '').split('\n'):
             if fact.strip():
                 cursor.execute('INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)', (day_id, fact.strip()))
@@ -408,6 +417,14 @@ def delete_day(day_id):
     conn.execute('DELETE FROM study_days WHERE id = ?', (day_id,))
     conn.execute('DELETE FROM character_facts WHERE day_id = ?', (day_id,))
     conn.execute('DELETE FROM liam_notes WHERE day_id = ?', (day_id,))
+    
+    # Clean up fallback state if active tracking day is removed
+    active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
+    if active_day_row and active_day_row['current_active_day_id'] == day_id:
+        next_day = conn.execute('SELECT id FROM study_days ORDER BY day_number ASC LIMIT 1').fetchone()
+        next_id = next_day['id'] if next_day else None
+        conn.execute('UPDATE app_state SET current_active_day_id = ? WHERE id = 1', (next_id,))
+        
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
