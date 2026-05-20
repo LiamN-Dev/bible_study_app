@@ -1,68 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Summer Bible Study - Student Dashboard & Shop</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 650px; margin: 0 auto; padding: 15px; padding-bottom: 60px; }
-        .hero-banner { background: linear-gradient(135deg, #2e7d32, #1b5e20); padding: 30px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 15px rgba(0,0,0,0.3); margin-bottom: 25px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .rank-badge { background: #2e7d32; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85rem; display: inline-block; margin-bottom: 8px; width: fit-content; }
-        .praise-glow { display: inline-block; background: #fef3c7; color: #b45309; font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; }
-        .badge-box { display: inline-flex; align-items: center; background: #334155; padding: 6px 12px; border-radius: 20px; margin: 4px; border: 1px solid #475569; font-size: 0.9rem; }
-        .mission-box { background: #064e3b; border: 2px dashed #10b981; border-radius: 16px; padding: 20px; text-align: center; margin-top: 20px; margin-bottom: 25px; }
-        .btn-shop { background: #fbc02d; color: #0f172a; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.85rem; transition: 0.2s; }
-        .btn-shop:hover:not(:disabled) { background: #fdd835; transform: scale(1.02); }
-        .btn-shop:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
-        h2 { color: #38bdf8; font-size: 1.3rem; margin-top: 0; margin-bottom: 15px; }
-        .shop-card { background: #1e293b; border: 1px solid #475569; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        .shop-cost { position: absolute; top: 12px; right: 12px; background: #0369a1; color: #e0f2fe; padding: 2px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <div class="hero-banner" style="position: relative;">
-        <a href="/" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.15); color: white; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2); transition: 0.2s;">
-            🚪 Log Out
-        </a>
-        <span style="font-size: 3rem;">☀️</span>
-        <h1 style="margin: 10px 0 0 0; font-size: 1.8rem; letter-spacing: 0.5px;">Summer Bible Study</h1>
-        <p style="margin: 5px 0 0 0; color: #c8e6c9; font-size: 1rem;">Student Campaign Dashboard</p>
-    </div>
-
-    <!-- ROSTER SECTION -->
-    <h2 style="font-size: 1.2rem; padding-left: 5px;">🔥 Study Roster</h2>
+<!-- ROSTER GRID (Displays the customized names!) -->
     <div class="grid">
         {% for p in profiles %}
         <div class="card">
             <div>
                 <div class="rank-badge">LVL {{ p['level'] }}</div>
-                
                 {% if p['praise_count'] > 0 %}
                     <div class="praise-glow">⭐ Parent Praised x{{ p['praise_count'] }}</div>
                 {% endif %}
                 
-                <!-- Dynamic Name Customization Box -->
+                <!-- This displays their custom bought colors, glows, and name titles -->
                 <strong style="display: block; font-size: 1.3rem; margin-bottom: 5px; 
-                    color: {{ p['name_color'] if p['name_color'] else '#ffffff' }}; 
-                    text-shadow: {{ '0 0 10px ' + p['name_color'] if p['name_style'] == 'glow' else 'none' }};
-                    font-style: {{ 'italic' if p['name_style'] == 'italic' else 'normal' }};">
-                    
-                    {{ p['player_title'] if p['player_title'] }} {{ p['display_name'] }}
+                    color: {{ p['name_color'] if p['name_color'] else '#ffffff' }};
+                    text-shadow: {{ '0 0 10px ' + p['name_color'] if p['name_style'] == 'glow' else 'none' }};">
+                    {{ p['player_title'] if p['player_title'] }}{{ p['display_name'] }}
                 </strong>
 
-                <span style="color: #10b981; font-weight: bold; font-size: 0.9rem;">✨ {{ p['points'] }} Total XP</span>
-                
-                <div style="margin-top: 12px;">
-                    <span style="font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 5px;">Inventory Items:</span>
+                <span style="color: #10b981; font-weight: bold; font-size: 0.9rem;">✨ {{ p['points'] }} XP</span>
+                <div style="margin-top: 10px;">
                     {% for b in p['badges'] %}
-                        <div class="badge-box" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</div>
-                    {% else %}
-                        <span style="font-size: 0.8rem; color: #64748b; font-style: italic;">No items achieved yet!</span>
+                        <div class="badge-box">{{ b['emoji'] }} {{ b['badge_name'] }}</div>
                     {% endfor %}
                 </div>
             </div>
@@ -70,108 +26,67 @@
         {% endfor %}
     </div>
 
-    <!-- DAILY MISSIONS MODULE -->
-    {% if day %}
-    <div class="card" style="border-left: 5px solid #38bdf8; margin-bottom: 20px;">
-        <h2>📖 Active Mission: {{ day['title'] }}</h2>
-        <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155;">
-            <strong style="color: #fbc02d; font-size: 0.9rem; display: block; margin-bottom: 5px;">🎯 MEMORY VERSE TARGET:</strong>
-            <p style="margin: 0; font-size: 1.1rem; font-style: italic; color: #e2e8f0; line-height: 1.4;">"{{ day['verse'] }}"</p>
+    <!-- 🛒 SHOP SWITCHER CONTROLLER -->
+    <h2 style="color: #fbc02d; margin-top: 30px;">🛒 Super Upgrades Marketplace</h2>
+    
+    <div style="background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <form action="/student/change_shopper" method="POST" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <label style="font-weight: bold; color: #cbd5e1;">👥 Who is buying upgrades?</label>
+            <select name="shopper_username" onchange="this.form.submit()" style="background: #0f172a; color: white; border: 1px solid #475569; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                {% for p in profiles %}
+                    <option value="{{ p['username'] }}" {% if p['username'] == shopper['username'] %}selected{% endif %}>
+                        {{ p['display_name'] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+            <span>Current Balance for <strong>{{ shopper['display_name'] }}</strong>:</span>
+            <span style="color: #10b981; font-weight: bold; font-size: 1.2rem;">✨ {{ shopper['points'] }} XP</span>
+        </div>
+    </div>
+
+    <!-- MAIN SHOP UPGRADE GRID -->
+    <div class="grid">
+        <!-- Loot Box -->
+        <div class="shop-card">
+            <span class="shop-cost">350 XP</span>
+            <div><strong style="color: #f43f5e; font-size: 1.1rem; display: block;">🎁 Mystery Loot Box</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">Roll for a surprise rare laser dino or diamond item!</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="lootbox"><button type="submit" class="btn-shop" {% if shopper['points'] < 350 %}disabled{% endif %}>Buy Box</button></form>
         </div>
 
-        <strong style="color: #38bdf8; font-size: 0.95rem; display: block; margin-bottom: 8px;">🛡️ Character Focus: {{ day['character_name'] }}</strong>
-        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 1.5;">
-            {% for fact in facts %}
-                <li style="margin-bottom: 8px;">{{ fact['fact_text'] }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+        <!-- Flame Color -->
+        <div class="shop-card">
+            <span class="shop-cost">300 XP</span>
+            <div><strong style="color: #ff4500; font-size: 1.1rem; display: block; text-shadow: 0 0 5px #ff4500;">🔥 Lava Flame Text</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">Turn your name into burning bright volcanic orange text!</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="color_fire"><button type="submit" class="btn-shop" {% if shopper['points'] < 300 %}disabled{% endif %}>Unlock Flame</button></form>
+        </div>
 
-    <div class="mission-box">
-        <h3 style="margin: 0 0 8px 0; color: #a7f3d0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Daily Action Objective</h3>
-        <p style="margin: 0; font-size: 1.2rem; color: #e0f2fe; font-weight: 500;">{{ day['kids_mission'] }}</p>
-    </div>
-    {% else %}
-    <div class="card" style="text-align: center; padding: 40px 20px; margin-bottom: 25px;">
-        <span style="font-size: 2.5rem;">🛌</span>
-        <h3 style="margin: 10px 0 0 0; color: #94a3b8;">No Active Mission Configured</h3>
-        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">Check back once Liam opens the daily study module!</p>
-    </div>
-    {% endif %}
-
-
-    <!-- 🛒 NEW STUDENT XP REWARDS MARKETPLACE -->
-    <h2 style="font-size: 1.4rem; padding-left: 5px; color: #fbc02d;">🛒 Student Upgrades Marketplace</h2>
-    <p style="color: #94a3b8; font-size: 0.85rem; padding-left: 5px; margin-top: -10px; margin-bottom: 15px;">Trade your hard-earned XP for rare vanity perks, badge assets, and visual styles.</p>
-    
-    <!-- Note: Assuming current user profile context 'current_user' is loaded, or fallback to first profile for test loops -->
-    {% set shopper = profiles[0] %} 
-    <div style="background: #020617; border: 1px solid #1e293b; border-radius: 12px; padding: 10px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span>Shopping as: <strong>{{ shopper['display_name'] }}</strong></span>
-        <span style="color: #10b981; font-weight: bold;">💰 {{ shopper['points'] }} XP Available</span>
-    </div>
-
-    <div class="grid">
-        <!-- Item 1: Loot Box -->
+        <!-- Laser Blue -->
         <div class="shop-card">
             <span class="shop-cost">500 XP</span>
-            <div>
-                <strong style="color: #f43f5e; font-size: 1.1rem; display: block; margin-bottom: 4px;">🎁 Mystery Loot Box</strong>
-                <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 15px 0;">Roll the dice to claim a random legendary collectible badge!</p>
-            </div>
-            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST">
-                <input type="hidden" name="item_key" value="lootbox">
-                <button type="submit" class="btn-shop" {% if shopper['points'] < 500 %}disabled{% endif %}>
-                    {% if shopper['points'] >= 500 %}🔓 Buy Loot Box{% else %}🔒 Need 500 XP{% endif %}
-                </button>
-            </form>
+            <div><strong style="color: #00d2ff; font-size: 1.1rem; display: block; text-shadow: 0 0 8px #00d2ff;">⚡ Laser Blue Glow</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">Makes your name glow with blue electricity!</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="color_laser_blue"><button type="submit" class="btn-shop" {% if shopper['points'] < 500 %}disabled{% endif %}>Unlock Glow</button></form>
         </div>
 
-        <!-- Item 2: Neon Emerald Text Glow -->
+        <!-- Tag: Super Hero -->
         <div class="shop-card">
-            <span class="shop-cost">750 XP</span>
-            <div>
-                <strong style="color: #10b981; font-size: 1.1rem; display: block; margin-bottom: 4px; text-shadow: 0 0 8px #10b981;">🟢 Emerald Neon Glow</strong>
-                <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 15px 0;">Applies a glowing green text filter overlay to your name on the roster.</p>
-            </div>
-            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST">
-                <input type="hidden" name="item_key" value="color_emerald">
-                <button type="submit" class="btn-shop" {% if shopper['points'] < 750 %}disabled{% endif %}>
-                    {% if shopper['points'] >= 750 %}🔓 Unlock Style{% else %}🔒 Need 750 XP{% endif %}
-                </button>
-            </form>
+            <span class="shop-cost">450 XP</span>
+            <div><strong style="color: #fbbf24; font-size: 1.1rem; display: block;">⚡ [SUPER HERO] Tag</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">Puts a cool superhero badge right before your name!</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="title_superhero"><button type="submit" class="btn-shop" {% if shopper['points'] < 450 %}disabled{% endif %}>Get Tag</button></form>
         </div>
 
-        <!-- Item 3: Cyberpunk Gold Text -->
+        <!-- Tag: Ninja -->
         <div class="shop-card">
-            <span class="shop-cost">1,000 XP</span>
-            <div>
-                <strong style="color: #fbbf24; font-size: 1.1rem; display: block; margin-bottom: 4px; text-shadow: 0 0 8px #fbbf24;">🟡 Cyber Gold Glow</strong>
-                <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 15px 0;">Transform your name with high-visibility radiant gold styling.</p>
-            </div>
-            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST">
-                <input type="hidden" name="item_key" value="color_gold">
-                <button type="submit" class="btn-shop" {% if shopper['points'] < 1000 %}disabled{% endif %}>
-                    {% if shopper['points'] >= 1000 %}🔓 Unlock Style{% else %}🔒 Need 1000 XP{% endif %}
-                </button>
-            </form>
+            <span class="shop-cost">550 XP</span>
+            <div><strong style="color: #a7f3d0; font-size: 1.1rem; display: block;">🥷 [NINJA] Rank Tag</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">Add a stealth ninja title prefix to your user card.</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="title_ninja"><button type="submit" class="btn-shop" {% if shopper['points'] < 550 %}disabled{% endif %}>Get Tag</button></form>
         </div>
 
-        <!-- Item 4: Elite Vanguard Title Prefix -->
+        <!-- Tag: Mega Boss -->
         <div class="shop-card">
-            <span class="shop-cost">1,250 XP</span>
-            <div>
-                <strong style="color: #38bdf8; font-size: 1.1rem; display: block; margin-bottom: 4px;">🛡️ Title: [VANGUARD]</strong>
-                <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 15px 0;">Permanently attaches the epic "[Vanguard]" server rank tag before your name.</p>
-            </div>
-            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST">
-                <input type="hidden" name="item_key" value="title_vanguard">
-                <button type="submit" class="btn-shop" {% if shopper['points'] < 1250 %}disabled{% endif %}>
-                    {% if shopper['points'] >= 1250 %}🔓 Claim Prefix Rank{% else %}🔒 Need 1250 XP{% endif %}
-                </button>
-            </form>
+            <span class="shop-cost">700 XP</span>
+            <div><strong style="color: #f43f5e; font-size: 1.1rem; display: block;">👑 [MEGA BOSS] Tag</strong><p style="color: #94a3b8; font-size: 0.8rem; margin: 4px 0 10px 0;">The ultimate title tag for the biggest high score leaders.</p></div>
+            <form action="/student/purchase_item/{{ shopper['username'] }}" method="POST"><input type="hidden" name="item_key" value="title_megaboss"><button type="submit" class="btn-shop" {% if shopper['points'] < 700 %}disabled{% endif %}>Get Title</button></form>
         </div>
     </div>
-
-</body>
-</html>
