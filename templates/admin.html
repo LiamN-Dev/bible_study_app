@@ -1,22 +1,105 @@
-<h2>🛠️ Master Release Pipeline</h2>
-{% for day in days %}
-    <div style="background: #334155; padding: 15px; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Operations Control Center</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; max-width: 850px; margin: 0 auto; padding: 30px 20px; }
+        .admin-header { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Alert Banner */
+        .alert-banner { background: linear-gradient(90deg, #f59e0b, #d97706); color: #0f172a; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        
+        .panel { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px; }
+        .panel-title { font-size: 1.3rem; font-weight: bold; color: #38bdf8; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        
+        /* Interactive Checklist System */
+        .todo-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: #111827; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #38bdf8; }
+        .todo-item input[type="checkbox"] { transform: scale(1.3); margin-top: 4px; cursor: pointer; }
+        .todo-item input[type="checkbox"]:checked + span { text-decoration: line-through; color: #64748b; }
+        
+        /* Timeline Row Elements */
+        .pipeline-row { background: #111827; padding: 15px 20px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; }
+        .btn-open { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-open:hover { background: #059669; }
+        .btn-close { background: #475569; color: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-close:hover { background: #334155; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
         <div>
-            <strong>{{ day['title'] }}</strong> - <span>{{ '🔒 Locked' if day['is_locked'] else '✅ Unlocked' }}</span>
-            {% if day['request_pending'] %}
-                <span style="color: #f59e0b; margin-left: 10px; font-weight:bold;">(Parent Requested Access!)</span>
-            {% endif %}
+            <h1 style="margin: 0; font-size: 1.75rem; color: #38bdf8;">🛠️ Systems Command Room</h1>
+            <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 0.95rem;">Application Director Dashboard</p>
         </div>
-        <div>
-            {% if day['is_locked'] %}
-                <form action="{{ url_for('unlock_day', day_id=day['id']) }}" method="POST">
-                    <button type="submit" style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Unlock / Approve</button>
-                </form>
-            {% else %}
-                <form action="{{ url_for('lock_day', day_id=day['id']) }}" method="POST">
-                    <button type="submit" style="background:#64748b; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Re-Lock</button>
-                </form>
-            {% endif %}
+        <div style="background: #0f172a; padding: 10px 18px; border-radius: 8px; border: 1px solid #334155; text-align: right;">
+            <span style="font-size: 0.8rem; color: #64748b; display: block;">TARGET TARGETS</span>
+            <strong style="color: #34d399;">System: Active</strong>
         </div>
     </div>
-{% endfor %}
+
+    <!-- Check for Pending Releases/Alerts -->
+    {% set ns = namespace(has_alerts=false) %}
+    {% for day in days %}
+        {% if day['request_pending'] %}
+            {% set ns.has_alerts = true %}
+        {% endif %}
+    {% endfor %}
+
+    {% if ns.has_alerts %}
+        <div class="alert-banner">
+            🔔 SYSTEM ACTION REQUIRED: A parent has initiated an access override request on a locked module!
+        </div>
+    {% endif %}
+
+    <!-- Live Study Execution Checklist -->
+    <div class="panel">
+        <div class="panel-title">🗣️ Live Session Script & Checklist (Interactive)</div>
+        <p style="color: #94a3b8; margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem;">Check these off on your device as you lead the session with Jude and Beau:</p>
+        
+        {% for note in data['liam_notes'] %}
+            <label class="todo-item">
+                <input type="checkbox">
+                <span>{{ note }}</span>
+            </label>
+        {% endfor %}
+    </div>
+
+    <!-- Data Gate Pipeline Control -->
+    <div class="panel">
+        <div class="panel-title">🎛️ Content Pipeline Matrix</div>
+        {% for day in days %}
+            <div class="pipeline-row">
+                <div>
+                    <strong style="font-size: 1.05rem;">{{ day['title'] }}</strong>
+                    <div style="margin-top: 4px; font-size: 0.85rem;">
+                        <span style="color: {{ '#f43f5e' if day['is_locked'] else '#10b981' }}; font-weight: bold;">
+                            {{ '🔒 LOCKED' if day['is_locked'] else '🔓 OPEN TO FAMILY' }}
+                        </span>
+                        {% if day['request_pending'] %}
+                            <span style="color: #fbbf24; font-weight: bold; margin-left: 10px; animation: flash 1s infinite;">⚠️ PARENT ACCESS REQUESTED</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div>
+                    {% if day['is_locked'] %}
+                        <form action="{{ url_for('unlock_day', day_id=day['id']) }}" method="POST">
+                            <button type="submit" class="btn-open">Approve & Unlock</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('lock_day', day_id=day['id']) }}" method="POST">
+                            <button type="submit" class="btn-close">Re-Lock Gate</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <p style="text-align: center; margin-top: 30px;"><a href="/" style="color: #38bdf8; text-decoration: none;">← Exit Admin Console</a></p>
+
+</body>
+</html>
