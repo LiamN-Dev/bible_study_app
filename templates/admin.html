@@ -14,8 +14,9 @@
         input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; }
         .btn-blue { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-green { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-purple { background: #7c3aed; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-red { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .player-row { background: #111827; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .player-row { background: #111827; padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -36,28 +37,44 @@
         </form>
     </div>
 
-    <!-- FEATURE 2: INSTANT XP REWARD TRIGGERS -->
+    <!-- FEATURE 2: POINTS & BADGES ENGINE -->
     <div class="panel">
-        <h2>⚡ Core Point & Milestone Issuer</h2>
+        <h2>⚡ Core Point & Badge Issuer</h2>
         {% for p in profiles %}
             <div class="player-row">
-                <div>
+                <div class="flex-row" style="margin-bottom: 10px;">
                     <strong>{{ p['display_name'] }}</strong> 
-                    <span style="color:#94a3b8; font-size:0.9rem; margin-left:10px;">Lvl {{ p['level'] }} ({{ p['points'] }} XP)</span>
+                    <span style="color:#38bdf8; font-weight:bold;">Lvl {{ p['level'] }} ({{ p['points'] }} XP)</span>
                 </div>
-                <form action="/admin/reward/{{ p['username'] }}" method="POST" style="display:flex; gap:5px;">
-                    <select name="xp" style="width:auto; padding:4px 8px; font-size:0.85rem;">
+                
+                <!-- XP Form -->
+                <form action="/admin/reward/{{ p['username'] }}" method="POST" style="display:flex; gap:5px; margin-bottom:10px;">
+                    <select name="xp" style="width:auto; padding:6px; font-size:0.85rem;">
                         <option value="25">+25 XP</option>
                         <option value="50" selected>+50 XP</option>
                         <option value="100">+100 XP</option>
                     </select>
-                    <button type="submit" class="btn-green">Grant</button>
+                    <button type="submit" class="btn-green">Grant Points</button>
+                </form>
+
+                <!-- Badge Form -->
+                <form action="/admin/award_badge/{{ p['username'] }}" method="POST" style="display:flex; gap:5px;">
+                    <input type="text" name="badge_name" placeholder="Badge Title (e.g. Word Explorer)" style="padding:6px; font-size:0.85rem;" required>
+                    <select name="emoji" style="width:70px; padding:6px; font-size:0.85rem;">
+                        <option value="🏆">🏆</option>
+                        <option value="🛡️">🛡️</option>
+                        <option value="⚔️">⚔️</option>
+                        <option value="👑">👑</option>
+                        <option value="🌟">🌟</option>
+                        <option value="🔥">🔥</option>
+                    </select>
+                    <button type="submit" class="btn-purple">Award Badge</button>
                 </form>
             </div>
         {% endfor %}
     </div>
 
-    <!-- FEATURE 3: DYNAMIC LESSON BUILDER (ADD DAYS) -->
+    <!-- FEATURE 3: DYNAMIC LESSON BUILDER -->
     <div class="panel">
         <h2>📝 Lesson Builder Pipeline Editor</h2>
         <form action="/admin/add_day" method="POST">
@@ -71,6 +88,9 @@
             </div>
             <div style="margin-bottom:12px;">
                 <textarea name="kids_mission" rows="2" placeholder="Daily Interactive Mission Objective..." required></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <textarea name="parent_takeaway" rows="2" placeholder="Dedicated Parent Overview Insight Takeaway..."></textarea>
             </div>
             <div class="form-row">
                 <textarea name="facts" rows="2" placeholder="Character Facts (One fact per line)"></textarea>
