@@ -38,7 +38,7 @@ def init_db():
         )
     ''')
     
-    # 3. Teaching Notes Table
+    # 3. Teaching Notes Table (Liam's Notes)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS liam_notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,18 +83,85 @@ def init_db():
         cursor.execute("INSERT INTO student_profiles VALUES ('jude', 'Jude', 0, 1)")
         cursor.execute("INSERT INTO student_profiles VALUES ('beau', 'Beau', 0, 1)")
         
-        # Initial Seed Day 1 Setup
+        # ========================================================
+        # AUTOMATED MASS CURRICULUM UPLOAD (DAYS 1-5)
+        # ========================================================
+        
+        # --- DAY 1 ---
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (1, 'Day 1: Joshua & Courage', 'Joshua 1:9 - "Be strong and courageous..."', 'Joshua', 'Encourage someone today when they are working hard!', 'Help your kids spot moments where they can choose courage over fear today.', 0)
+            VALUES (1, 'Day 1: The Sword Boot Camp', 'Genesis 1:1', 'The Bible / Navigation', 
+                    'Draw your swords! Practice finding Genesis 1:1 three times at home today.', 
+                    'We learned the 2-Minute Map Tour (Old vs New Testament) and how chapters/verses work like a GPS address (Book -> Chapter -> Verse). Help them practice flipping to the Table of Contents if they get stuck!', 0)
         ''')
-        day_id = cursor.lastrowid
-        
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (day_id, "He was Moses' trusted assistant."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (day_id, "He successfully led Israel into the Promised Land."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (day_id, "Read Joshua Chapter 1 together."))
-        
-        cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (day_id,))
+        d1_id = cursor.lastrowid
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d1_id, "The Bible is a library of 66 separate books bound together."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d1_id, "The Old Testament is the front 3/4; the New Testament is the back 1/4."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d1_id, "The Big Number is the Chapter; the Tiny Number is the Verse."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "Map Tour: Front 3/4 is Old Testament, back 1/4 is New Testament. Use Table of Contents as a cheat sheet."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "GPS Code explanation: Genesis 1:1 is Book -> Chapter (Big) -> Verse (Tiny). Like City -> Street -> House."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "Game Rules: Hold Bibles flat on palms above heads. Shout 'Draw your swords! Find Genesis 1:1... CHARGE!' Run 3 practice rounds."))
+
+        # --- DAY 2 ---
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
+            VALUES (2, 'Day 2: Creation & The Sneaky Snake', 'Genesis 1:1 & Genesis 3:1', 'Adam, Eve & The Snake', 
+                    'If you could ask God to create one brand new animal right now, what would it look like?', 
+                    'We covered Genesis 1 and 3 today—how God made a perfect world, how sin entered through a trick, and God''s immediate promise that a Savior would come defeat the snake.', 1)
+        ''')
+        d2_id = cursor.lastrowid
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d2_id, "God speaks and creates everything out of absolutely nothing."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d2_id, "God looks at everything He made and says, 'It is very good!'"))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d2_id, "A sneaky snake (Satan) tricks Adam and Eve into breaking God's one rule, bringing sin into the world."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Bible Search target: Genesis Chapters 1 & 3."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Sword Drill Challenge: Race to find Genesis 1:1 and Genesis 3:1."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Emphasize: Even right when things got broken, God promised a Savior would come to defeat the snake one day."))
+
+        # --- DAY 3 ---
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
+            VALUES (3, 'Day 3: The Giant Boat & The Tall Tower', 'Genesis 7:1 & Genesis 11:4', 'Noah & The People of Babel', 
+                    'Imagine waking up tomorrow and your sibling is speaking total gibberish. How would you clean your room together?', 
+                    'We looked at the global flood reset with Noah''s Ark (Genesis 7) and the skyscraper of pride at the Tower of Babel (Genesis 11). Talk tonight about why humility matters.', 1)
+        ''')
+        d3_id = cursor.lastrowid
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "The world gets so full of bad choices that God hits the reset button using a flood."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "God tells Noah to build a massive ark to save his family and the animals."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "Humans proudly try to build a skyscraper (The Tower of Babel) to heaven to make themselves famous."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Bible Search target: Genesis Chapters 7 & 11."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Sword Drill Challenge: Race to find Genesis 7:1 and Genesis 11:4."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Key concept: God stops the proud construction by switching up their languages instantly, scattering them across the earth."))
+
+        # --- DAY 4 ---
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
+            VALUES (4, 'Day 4: The Ultimate Test & Joseph''s Dreams', 'Genesis 22:11 & Genesis 37:3', 'Abraham, Isaac & Joseph', 
+                    'Joseph''s brothers made a terrible choice out of jealousy. What is a better thing to do when you feel jealous of someone else?', 
+                    'We saw Abraham learn that God always provides (Genesis 22) and young Joseph get sold into slavery by his jealous brothers (Genesis 37). Great time to talk about handling family jealousy.', 1)
+        ''')
+        d4_id = cursor.lastrowid
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "God tests Abraham's trust with his son Isaac, but stops him at the last second and provides a ram instead."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "Teenage Joseph gets a fancy colorful coat from his dad and has dreams that he will be a ruler."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "Joseph's brothers get so jealous that they throw him in a pit and sell him into slavery."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Bible Search target: Genesis Chapters 22 & 37."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Sword Drill Challenge: Race to find Genesis 22:11 and Genesis 37:3."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Takeaway point: Abraham learned God always provides. Joseph's story sets up how jealousy breaks relationships."))
+
+        # --- DAY 5 ---
+        cursor.execute('''
+            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
+            VALUES (5, 'Day 5: The Friday Championship Tournament', 'Championship List', 'All Week Champions', 
+                    'No new stories today—this is pure game day to lock in your speed before school starts!', 
+                    'Tournament day! We drilled all 6 major target verses from this week to lock down their quick navigation mechanics.', 1)
+        ''')
+        d5_id = cursor.lastrowid
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d5_id, "This day is dedicated to a massive review game to lock in Bible navigation mechanics."))
+        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d5_id, "Target list: Genesis 1:1, Genesis 3:4, Genesis 7:7, Genesis 11:9, Genesis 22:13, and Genesis 37:3."))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Tournament Instructions: Kids stand up with Bibles over their heads. Call out a target verse from the list, then yell 'CHARGE!'"))
+        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Scoring: The first person to find the verse, stand up straight, and read the first three words wins 10 points."))
+
+        # Set default active module link to Day 1
+        cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (d1_id,))
         conn.commit()
         
     conn.close()
@@ -183,12 +250,28 @@ def admin():
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
     current_day_id = active_day_row['current_active_day_id'] if active_day_row else None
     
-    notes = []
-    if current_day_id:
-        notes = conn.execute('SELECT * FROM liam_notes WHERE day_id = ?', (current_day_id,)).fetchall()
+    # NEW FIX: Gather ALL notes, grouped cleanly by their day_id for individual display sections
+    all_notes_raw = conn.execute('''
+        SELECT liam_notes.*, study_days.day_number, study_days.title 
+        FROM liam_notes 
+        JOIN study_days ON liam_notes.day_id = study_days.id
+        ORDER BY study_days.day_number ASC
+    ''').fetchall()
+    
+    # Structure the notes dynamically into a dictionary grouped by day_id
+    notes_by_day = {}
+    for note in all_notes_raw:
+        d_id = note['day_id']
+        if d_id not in notes_by_day:
+            notes_by_day[d_id] = {
+                'title': f"Day {note['day_number']}: {note['title']}",
+                'items': []
+            }
+        notes_by_day[d_id]['items'].append(note['note_text'])
         
     conn.close()
-    return render_template('admin.html', days=days, profiles=profiles, current_day_id=current_day_id, notes=notes)
+    return render_template('admin.html', days=days, profiles=profiles, 
+                           current_day_id=current_day_id, notes_by_day=notes_by_day)
 
 # ========================================================
 # ENGINE MANAGEMENT PORTS (REWARDS, BADGES, & ACTIONS)
