@@ -1,27 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Teacher Control Panel</title>
-</head>
-<body style="font-family: sans-serif; background-color: #1e1e24; color: #f5f5f5; padding: 30px;">
-
-    <h1>Liam's Teacher Control Panel</h1>
-    <a href="/" style="color: #61afef;">Log Out</a>
-    <hr style="border-color: #444;">
-
-    <h2>Today's Teaching Flow & Notes:</h2>
-    <ul>
-        {% for note in data.liam_notes %}
-            <li style="margin-bottom: 12px; font-size: 18px; line-height: 1.5;">{{ note }}</li>
-        {% endfor %}
-    </ul>
-
-    <div style="background-color: #2d3139; padding: 15px; border-radius: 6px; margin-top: 30px;">
-        <h3>Quick Reference of what the Kids see:</h3>
-        <p><strong>Verse:</strong> {{ data.verse }}</p>
-        <p><strong>Character:</strong> {{ data.character_name }}</p>
+<h2>🛠️ Master Release Pipeline</h2>
+{% for day in days %}
+    <div style="background: #334155; padding: 15px; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>{{ day['title'] }}</strong> - <span>{{ '🔒 Locked' if day['is_locked'] else '✅ Unlocked' }}</span>
+            {% if day['request_pending'] %}
+                <span style="color: #f59e0b; margin-left: 10px; font-weight:bold;">(Parent Requested Access!)</span>
+            {% endif %}
+        </div>
+        <div>
+            {% if day['is_locked'] %}
+                <form action="{{ url_for('unlock_day', day_id=day['id']) }}" method="POST">
+                    <button type="submit" style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Unlock / Approve</button>
+                </form>
+            {% else %}
+                <form action="{{ url_for('lock_day', day_id=day['id']) }}" method="POST">
+                    <button type="submit" style="background:#64748b; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Re-Lock</button>
+                </form>
+            {% endif %}
+        </div>
     </div>
-
-</body>
-</html>
+{% endfor %}
