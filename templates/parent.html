@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Portal</title>
+</head>
+<body style="font-family: sans-serif; background-color: #f8fafc; color: #334155; padding: 30px;">
+
+    <h1>Mom & Dad's Lesson Overview</h1>
+    <a href="/" style="color: #3b82f6;">Log Out</a>
+    <hr style="border-color: #e2e8f0;">
+
+    <div style="max-width: 800px; margin-top: 20px;">
+        <h2>What the boys covered today:</h2>
+        <p style="font-size: 18px; line-height: 1.6; background-color: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            {{ data.parent_summary }}
+        </p>
+
+        <div style="background-color: #eff6ff; border-left: 5px solid #3b82f6; padding: 20px; margin-top: 30px; border-radius: 0 8px 8px 0;">
+            <h3 style="color: #1d4ed8; margin-top: 0; font-size: 20px;">💬 Dinner Table Conversation Starter:</h3>
+            <p style="font-size: 18px; font-weight: bold; margin-bottom: 0; color: #1e3a8a;">
+                {{ data.parent_dinner_question }}
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

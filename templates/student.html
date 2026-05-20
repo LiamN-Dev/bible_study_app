@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brothers' Dashboard</title>
+    <!-- Linking our master stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Bible Study Adventure! 📖</h1>
+        <a href="/" class="logout-link">Log Out</a>
+
+        <!-- PROFILE SWITCHER BUTTONS -->
+        <div style="margin-bottom: 25px;">
+            <button id="judeBtn" class="profile-toggle-btn active" onclick="switchProfile('jude')">Jude's Stats</button>
+            <button id="beauBtn" class="profile-toggle-btn" onclick="switchProfile('beau')">Beau's Stats</button>
+        </div>
+
+        <!-- JUDE'S PROFILE SHELF -->
+        <div id="judeProfile" class="card" style="border-left: 8px solid #3b82f6;">
+            <h2 style="margin-top:0; color:#1d4ed8;">⚡ Profile: {{ data.profiles.jude.name }} (Age {{ data.profiles.jude.age }})</h2>
+            <p style="font-size: 18px;"><strong>Current Level:</strong> Rank {{ data.profiles.jude.level }} | 🪙 <strong>Points:</strong> {{ data.profiles.jude.points }}</p>
+            <h3>Unlocked Badges:</h3>
+            <div class="badge-shelf">
+                {% for badge in data.profiles.jude.badges %}
+                    <div class="badge-item">
+                        <span class="badge-icon">{{ badge.icon }}</span>
+                        <div>
+                            <strong style="display:block;">{{ badge.title }}</strong>
+                            <small style="color:#64748b;">{{ badge.desc }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- BEAU'S PROFILE SHELF (Hidden by default) -->
+        <div id="beauProfile" class="card" style="border-left: 8px solid #ec4899; display: none;">
+            <h2 style="margin-top:0; color:#be185d;">⚡ Profile: {{ data.profiles.beau.name }} (Age {{ data.profiles.beau.age }})</h2>
+            <p style="font-size: 18px;"><strong>Current Level:</strong> Rank {{ data.profiles.beau.level }} | 🪙 <strong>Points:</strong> {{ data.profiles.beau.points }}</p>
+            <h3>Unlocked Badges:</h3>
+            <div class="badge-shelf">
+                {% for badge in data.profiles.beau.badges %}
+                    <div class="badge-item">
+                        <span class="badge-icon">{{ badge.icon }}</span>
+                        <div>
+                            <strong style="display:block;">{{ badge.title }}</strong>
+                            <small style="color:#64748b;">{{ badge.desc }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- INTERACTIVE MEMORY VERSE CARD -->
+        <div class="card verse-card">
+            <h2 style="margin-top: 0;">Verse of the Day:</h2>
+            <!-- Original verse hidden safely in an attribute so Javascript can reference it -->
+            <p id="verseDisplay" data-original="{{ data.verse }}" style="font-size: 22px; font-weight: bold; line-height: 1.6; color: #14532d;">
+                {{ data.verse }}
+            </p>
+            <button class="game-btn" onclick="fadeRandomWords()">Hiding Mode: On 🧠</button>
+            <button class="game-btn" style="background-color: #64748b;" onclick="resetVerse()">Reset Verse 🔄</button>
+        </div>
+
+        <!-- HERO SPOTLIGHT -->
+        <div class="card" style="border-left: 8px solid #eab308;">
+            <h2 style="margin-top: 0; color: #a16207;">Hero Spotlight: ⭐ {{ data.character_name }} ⭐</h2>
+            <ul style="padding-left: 20px;">
+                {% for fact in data.character_facts %}
+                    <li style="font-size: 18px; margin-bottom: 10px; line-height: 1.4;">{{ fact }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- DAILY MISSION -->
+        <div class="card mission-card">
+            <h2 style="margin-top: 0;">⚡ TODAY'S MISSION ⚡</h2>
+            <p style="font-size: 20px; font-weight: bold; margin-bottom: 0;">{{ data.kids_mission }}</p>
+        </div>
+
+    </div>
+
+    <!-- CLIENT SIDE INTERACTION SCRIPT -->
+    <script>
+        // FEATURE 1: PROFILE SWITCHER
+        function switchProfile(profile) {
+            if (profile === 'jude') {
+                document.getElementById('judeProfile').style.display = 'block';
+                document.getElementById('beauProfile').style.display = 'none';
+                document.getElementById('judeBtn').classList.add('active');
+                document.getElementById('beauBtn').classList.remove('active');
+            } else {
+                document.getElementById('judeProfile').style.display = 'none';
+                document.getElementById('beauProfile').style.display = 'block';
+                document.getElementById('judeBtn').classList.remove('active');
+                document.getElementById('beauBtn').classList.add('active');
+            }
+        }
+
+        // FEATURE 2: INTERACTIVE WORD FADER
+        function fadeRandomWords() {
+            let displayElement = document.getElementById('verseDisplay');
+            let words = displayElement.innerText.split(' ');
+            
+            // Loop through words and randomly change ~30% of them into blanks
+            for (let i = 0; i < words.length; i++) {
+                // Skip words that are already blanked out
+                if (words[i].includes('___')) continue;
+                
+                if (Math.random() < 0.3) {
+                    // Retain word length visual estimation
+                    words[i] = "_______";
+                }
+            }
+            displayElement.innerText = words.join(' ');
+        }
+
+        function resetVerse() {
+            let displayElement = document.getElementById('verseDisplay');
+            // Pull the raw string back out of our custom data backup attribute
+            displayElement.innerText = displayElement.getAttribute('data-original');
+        }
+    </script>
+
+</body>
+</html>

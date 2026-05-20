@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Study Dashboard - Login</title>
+</head>
+<body>
+
+    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+        <h1>Bible Study Command Center</h1>
+        <h3>Who is logging in today?</h3>
+        
+        <!-- The Three Main Buttons -->
+        <div style="margin-bottom: 20px;">
+            <button onclick="revealPasswordForm('admin')" style="padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer;">Liam (Admin)</button>
+            <button onclick="revealPasswordForm('student')" style="padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer;">Brothers (Students)</button>
+            <button onclick="revealPasswordForm('parent')" style="padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer;">Mom & Dad (Parents)</button>
+        </div>
+
+        <!-- The Password Form (Hidden by default using style="display: none;") -->
+        <form id="passwordForm" action="/login" method="POST" style="display: none; border: 1px solid #ccc; padding: 20px; width: 300px; margin: 0 auto; border-radius: 8px;">
+            <p>Logging in as: <strong id="displayRole" style="text-transform: capitalize;"></strong></p>
+            
+            <!-- This hidden input field stores the role so Python knows who it is -->
+            <input type="hidden" id="roleInput" name="role" value="">
+            
+            <div style="margin-bottom: 15px;">
+                <label for="password" style="display: block; margin-bottom: 5px;">Enter Password:</label>
+                <input type="password" id="password" name="password" required style="padding: 8px; width: 90%;">
+            </div>
+            
+            <button type="submit" style="padding: 8px 15px; background-color: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer;">Unlock Dashboard</button>
+        </form>
+    </div>
+
+    <!-- The Javascript trick to show the input box -->
+    <script>
+        function revealPasswordForm(role) {
+            // Update the hidden text and inputs to match the clicked button
+            document.getElementById('displayRole').innerText = role;
+            document.getElementById('roleInput').value = role;
+            
+            // Unhide the password box form smoothly
+            document.getElementById('passwordForm').style.display = 'block';
+            
+            // Clear any old password typing out of the box
+            document.getElementById('password').value = '';
+            document.getElementById('password').focus();
+        }
+    </script>
+
+</body>
+</html>
