@@ -291,9 +291,8 @@ def admin_adjust_praise(username, action):
     if action == 'add':
         conn.execute('UPDATE student_profiles SET praise_count = praise_count + 1 WHERE username = ?', (username,))
     elif action == 'remove':
-        user = conn.execute('SELECT praise_count FROM student_profiles WHERE username = ?', (username,)).fetchone()
-        if user and user['praise_count'] > 0:
-            conn.execute('UPDATE student_profiles SET praise_count = praise_count - 1 WHERE username = ?', (username,))
+        # Prevent praise count from dropping below zero
+        conn.execute('UPDATE student_profiles SET praise_count = MAX(0, praise_count - 1) WHERE username = ?', (username,))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
