@@ -172,7 +172,6 @@ PASSWORD_DATABASE = {"admin": "liam123", "parent": "parents2026", "student": "bi
 def home():
     return render_template('login.html')
 
-# NEW INTERCEPT: Processes login securely via asynchronous requests to avoid redirects on errors
 @app.route('/login', methods=['POST'])
 def handle_login():
     role = request.form.get('role')
@@ -273,10 +272,10 @@ def admin():
                            current_day_id=current_day_id, notes_by_day=notes_by_day)
 
 # ========================================================
-# ADVANCED MECHANICS ENGINE (PRAISE, LOOT BOXES, REWARDS)
+# ADVANCED MECHANICS ENGINE (REWORKED PRAISE & SHOP CORNER)
 # ========================================================
 
-# NEW FEATURE: Direct Parent Encouragement Star Port
+# Parent Praise Incrementor
 @app.route('/parent/praise/<username>', methods=['POST'])
 def parent_praise(username):
     conn = get_db_connection()
@@ -285,35 +284,53 @@ def parent_praise(username):
     conn.close()
     return redirect(url_for('parent'))
 
-# NEW FEATURE: Mystery Loot Box Point Shop Exchange
-@app.route('/student/buy_lootbox/<username>', methods=['POST'])
-def buy_lootbox(username):
-    MYSTERY_POOL = [
-        {"name": "Mythic Dragon Familiar", "emoji": "🐉"},
-        {"name": "Legendary Paladin Blade", "emoji": "⚔️"},
-        {"name": "Archangel Aegis Shield", "emoji": "🛡️"},
-        {"name": "Crown of Wisdom", "emoji": "👑"},
-        {"name": "Chariot of Fire Rider", "emoji": "🏎️"},
-        {"name": "Neon Star Aura", "emoji": "✨"}
-    ]
+# NEW: Admin Praise Star Incrementor & Decrementor Ports
+@app.route('/admin/adjust_praise/<username>/<action>', methods=['POST'])
+def admin_adjust_praise(username, action):
+    conn = get_db_connection()
+    if action == 'add':
+        conn.execute('UPDATE student_profiles SET praise_count = praise_count + 1 WHERE username = ?', (username,))
+    elif action == 'remove':
+        user = conn.execute('SELECT praise_count FROM student_profiles WHERE username = ?', (username,)).fetchone()
+        if user and user['praise_count'] > 0:
+            conn.execute('UPDATE student_profiles SET praise_count = praise_count - 1 WHERE username = ?', (username,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+# REWORKED: Precise Student Catalog Point Exchange
+@app.route('/student/purchase_item/<username>', methods=['POST'])
+def student_purchase_item(username):
+    SHOP_CATALOG = {
+        "dragon": {"name": "Mythic Dragon Familiar", "emoji": "🐉", "cost": 600},
+        "blade": {"name": "Legendary Paladin Blade", "emoji": "⚔️", "cost": 400},
+        "shield": {"name": "Archangel Aegis Shield", "emoji": "🛡️", "cost": 300},
+        "crown": {"name": "Crown of Wisdom", "emoji": "👑", "cost": 500},
+        "chariot": {"name": "Chariot of Fire Rider", "emoji": "🏎️", "cost": 750},
+        "aura": {"name": "Neon Star Aura", "emoji": "✨", "cost": 200}
+    }
+    
+    item_key = request.form.get('item_key')
+    if item_key not in SHOP_CATALOG:
+        return redirect(url_for('student'))
+        
+    selected_item = SHOP_CATALOG[item_key]
+    cost = selected_item['cost']
     
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM student_profiles WHERE username = ?', (username,)).fetchone()
     
-    if user and user['points'] >= 500:
-        # Deduct cost
-        new_points = user['points'] - 500
+    if user and user['points'] >= cost:
+        new_points = user['points'] - cost
         conn.execute('UPDATE student_profiles SET points = ? WHERE username = ?', (new_points, username))
-        
-        # Roll reward item
-        prize = random.choice(MYSTERY_POOL)
         conn.execute('INSERT INTO badges (username, badge_name, emoji) VALUES (?, ?, ?)', 
-                     (username, prize['name'], prize['emoji']))
+                     (username, selected_item['name'], selected_item['emoji']))
         conn.commit()
         
     conn.close()
     return redirect(url_for('student'))
 
+# Enhanced Admin XP Porter (With level-down capabilities & floor limits)
 @app.route('/admin/reward/<username>', methods=['POST'])
 def award_xp(username):
     xp_amount = int(request.form.get('xp', 50))
@@ -321,9 +338,15 @@ def award_xp(username):
     user = conn.execute('SELECT * FROM student_profiles WHERE username = ?', (username,)).fetchone()
     if user:
         new_xp = user['points'] + xp_amount
+        if new_xp < 0: 
+            new_xp = 0 
+            
         new_level = user['level']
-        if new_xp >= (new_level * 150):
+        if xp_amount > 0 and new_xp >= (new_level * 150):
             new_level += 1
+        elif xp_amount < 0 and new_xp < ((new_level - 1) * 150) and new_level > 1:
+            new_level -= 1
+            
         conn.execute('UPDATE student_profiles SET points = ?, level = ? WHERE username = ?', (new_xp, new_level, username))
         conn.commit()
     conn.close()
