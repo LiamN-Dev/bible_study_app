@@ -1,28 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Parent Portal</title>
-</head>
-<body style="font-family: sans-serif; background-color: #f8fafc; color: #334155; padding: 30px;">
-
-    <h1>Mom & Dad's Lesson Overview</h1>
-    <a href="/" style="color: #3b82f6;">Log Out</a>
-    <hr style="border-color: #e2e8f0;">
-
-    <div style="max-width: 800px; margin-top: 20px;">
-        <h2>What the boys covered today:</h2>
-        <p style="font-size: 18px; line-height: 1.6; background-color: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            {{ data.parent_summary }}
-        </p>
-
-        <div style="background-color: #eff6ff; border-left: 5px solid #3b82f6; padding: 20px; margin-top: 30px; border-radius: 0 8px 8px 0;">
-            <h3 style="color: #1d4ed8; margin-top: 0; font-size: 20px;">💬 Dinner Table Conversation Starter:</h3>
-            <p style="font-size: 18px; font-weight: bold; margin-bottom: 0; color: #1e3a8a;">
-                {{ data.parent_dinner_question }}
-            </p>
-        </div>
+<h2>📅 Upcoming Study Calendar</h2>
+{% for day in days %}
+    <div style="padding: 15px; margin-bottom: 10px; border-radius: 6px; background: white; border-left: 5px solid {{ '#e74c3c' if day['is_locked'] else '#2ecc71' }}; color: #333;">
+        <h4>{{ day['title'] }}</h4>
+        
+        {% if not day['is_locked'] %}
+            <p>{{ day['content'] }}</p>
+        {% else %}
+            <p>🔒 <em>This day's study guide is locked.</em></p>
+            {% if day['request_pending'] == 0 %}
+                <form action="{{ url_for('request_access', day_id=day['id']) }}" method="POST">
+                    <button type="submit" style="background:#3498db; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Request Early Viewing Access</button>
+                </form>
+            {% else %}
+                <span style="color: #7f8c8d; font-style: italic;">⏳ Access Requested. Waiting for Liam to unlock...</span>
+            {% endif %}
+        {% endif %}
     </div>
-
-</body>
-</html>
+{% endfor %}
