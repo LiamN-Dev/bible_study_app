@@ -2,40 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bible Study Arcade - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summer Bible Study - Login</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121214; color: #fff; text-align: center; padding-top: 100px; }
-        .login-card { background: #1c1c1f; max-width: 400px; margin: 0 auto; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #2d2d30; }
-        h1 { margin-bottom: 30px; color: #ffca28; }
-        select, input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #3a3a3c; background: #2a2a2e; color: white; box-sizing: border-box; font-size: 16px; }
-        button { background: #ffca28; color: #121214; font-weight: bold; border: none; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-        button:hover { background: #ffe082; }
+        :root {
+            --primary: #2e7d32;      /* Deep summer leaf green */
+            --accent: #fbc02d;       /* Warm sunshine yellow */
+            --bg: #f4f7f5;           /* Soft, clean off-white background */
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .login-card { 
+            background: var(--card-bg); 
+            width: 100%;
+            max-width: 420px; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1); 
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .logo-area {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h1 { 
+            margin: 0 0 10px 0; 
+            color: var(--primary); 
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        select, input { 
+            width: 100%; 
+            padding: 12px 16px; 
+            margin-bottom: 20px; 
+            border-radius: 8px; 
+            border: 2px solid #e0e0e0; 
+            background: #fafafa; 
+            color: var(--text-main); 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        button { 
+            width: 100%;
+            padding: 14px;
+            background: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+            font-size: 16px;
+            border: none; 
+            border-radius: 8px;
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+            letter-spacing: 0.5px;
+        }
+
+        button:hover { 
+            background: #1b5e20; 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Error Banner Element */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            text-align: left;
+            border-left: 4px solid #e53935;
+        }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <h1>⚔️ Sword Drill Arcade</h1>
+    <div class="logo-area">☀️</div>
+    <h1>Summer Bible Study</h1>
+    <div class="subtitle">Welcome! Please sign into your portal.</div>
+
+    <!-- Hidden by default, unrolls via JS if password fails -->
+    <div id="errorBanner" class="error-message"></div>
+
     <form id="loginForm">
-        <label for="role">Choose Your Portal:</label>
+        <label for="role">Select Portal</label>
         <select name="role" id="role">
-            <option value="student">Student Dashboard</option>
-            <option value="parent">Parent Portal</option>
-            <option value="admin">Liam (Admin)</option>
+            <option value="student">👨‍🎓 Student Dashboard</option>
+            <option value="parent">👪 Parent Portal</option>
+            <option value="admin">⚙️ Liam (Admin)</option>
         </select>
 
-        <label for="password" style="display:block; margin-top: 15px; text-align: left;">Passcode:</label>
-        <input type="password" name="password" id="password" required placeholder="Enter password...">
+        <label for="password">Passcode</label>
+        <input type="password" name="password" id="password" required placeholder="Enter security key...">
 
-        <button type="submit">ENTER ARCADE</button>
+        <button type="submit">SIGN IN</button>
     </form>
 </div>
 
 <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Stop page from redirecting
+        e.preventDefault();
         
         const formData = new FormData(this);
+        const errorBanner = document.getElementById('errorBanner');
+        const passwordInput = document.getElementById('password');
+        
+        // Clear out old errors on submission
+        errorBanner.style.display = 'none';
+        errorBanner.textContent = '';
         
         fetch('/login', {
             method: 'POST',
@@ -44,15 +166,20 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Password correct! Go to portal
                 window.location.href = data.redirect_url;
             } else {
-                // Password wrong! Pop up alert window smoothly
-                alert("❌ " + data.message);
-                document.getElementById('password').value = ''; // Clear input field
+                // Show custom elegant error warning instead of browser alert
+                errorBanner.textContent = data.message;
+                errorBanner.style.display = 'block';
+                passwordInput.value = ''; 
+                passwordInput.focus();
             }
         })
-        .catch(err => console.error("Error:", err));
+        .catch(err => {
+            console.error("Error:", err);
+            errorBanner.textContent = "Something went wrong. Please check your local connection.";
+            errorBanner.style.display = 'block';
+        });
     });
 </script>
 
