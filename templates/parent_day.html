@@ -2,43 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Parent Lesson Deep Dive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Takeaway Content</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 650px; margin: 0 auto; padding: 15px; }
-        .back-link { display: inline-block; margin-bottom: 15px; color: #38bdf8; text-decoration: none; font-weight: bold; }
-        .hero-box { background: linear-gradient(135deg, #064e3b, #10b981); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .section-card { background: #1e293b; padding: 20px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h3 { margin-top: 0; color: #34d399; border-bottom: 2px solid #334155; padding-bottom: 6px; font-size: 1.10rem; }
-        ul { margin: 0; padding-left: 20px; color: #cbd5e1; }
-        li { margin-bottom: 6px; }
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 2rem; }
+        .card { background: #1e293b; max-width: 700px; margin: 2rem auto; padding: 2rem; border-radius: 10px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h1 { color: #38bdf8; margin-top: 0; }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: #94a3b8; text-decoration: none; font-weight: bold; }
+        .back-link:hover { color: white; }
     </style>
 </head>
 <body>
-    <a href="/parent" class="back-link">← Return to Dashboard</a>
-    
-    <div class="hero-box">
-        <span style="text-transform:uppercase; font-size:0.8rem; font-weight:bold; background:#047857; padding:4px 10px; border-radius:20px;">Lesson Review</span>
-        <h1 style="margin:5px 0 0 0; font-size:1.6rem;">{{ day['title'] }}</h1>
-    </div>
+    <div class="card">
+        <a href="/parent" class="back-link">← Return to Dashboard Overview</a>
+        
+        {% if locked %}
+            <h1 style="color:#ef4444;">🔒 Lesson Module Secured</h1>
+            <p style="font-size:1.1rem; line-height:1.6;">You must request administrative clearance from the system controller or developer module before viewing these take-home evaluation sheets.</p>
+        {% else %}
+            <h1>Day {{ day.day_number }}: {{ day.title }}</h1>
+            <p style="font-size: 1.2rem; color: #f59e0b; font-weight: bold; background: #0f172a; padding: 0.75rem; border-radius: 6px;">Scripture Passage Target: {{ day.verse }}</p>
+            
+            <h3>👨‍👩‍👧 Parent Lesson Cheat-Sheet Takeaway:</h3>
+            <div style="background: #2563eb; padding: 1.25rem; border-radius: 6px; color: white; font-size: 1.1rem; line-height: 1.5;">
+                {{ day.parent_takeaway }}
+            </div>
 
-    <div class="section-card">
-        <h3>📜 Core Scripture Reference</h3>
-        <p style="font-size:1.1rem; font-style:italic; color:#e2e8f0; margin:0;">{{ day['verse'] }}</p>
-    </div>
-
-    <div class="section-card">
-        <h3>🛡️ Character Focus: {{ day['character_name'] }}</h3>
-        <ul>
-            {% for fact in facts %}
-                <li>{{ fact['fact_text'] }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="section-card" style="border-left: 5px solid #10b981; background: #064e3b2b;">
-        <h3 style="color:#34d399;">💡 What We Covered Today</h3>
-        <p style="font-size:1.05rem; line-height:1.5; color:#e2e8f0; margin:0;">{{ day['parent_takeaway'] }}</p>
+            <h3>Core Identity Target Facts:</h3>
+            <ul>
+                {% for fact in facts %}
+                    <li style="margin-bottom:0.5rem;">{{ fact.fact_text }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </div>
 </body>
 </html>
