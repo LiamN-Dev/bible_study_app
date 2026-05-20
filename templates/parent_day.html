@@ -5,38 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Parent Lesson Deep Dive</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f8fafc; color: #1e293b; max-width: 650px; margin: 0 auto; padding: 15px; }
-        .back-link { display: inline-block; margin-bottom: 15px; color: #4f46e5; text-decoration: none; font-weight: bold; }
-        .hero-box { background: linear-gradient(135deg, #064e3b, #10b981); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; }
-        .section-card { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #e2e8f0; }
-        h3 { margin-top: 0; color: #064e3b; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 650px; margin: 0 auto; padding: 15px; }
+        .back-link { display: inline-block; margin-bottom: 15px; color: #38bdf8; text-decoration: none; font-weight: bold; }
+        .hero-box { background: linear-gradient(135deg, #064e3b, #10b981); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .section-card { background: #1e293b; padding: 20px; border-radius: 14px; margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h3 { margin-top: 0; color: #34d399; border-bottom: 2px solid #334155; padding-bottom: 6px; font-size: 1.10rem; }
+        ul { margin: 0; padding-left: 20px; color: #cbd5e1; }
+        li { margin-bottom: 6px; }
     </style>
 </head>
 <body>
     <a href="/parent" class="back-link">← Return to Dashboard</a>
     
     <div class="hero-box">
-        <span style="text-transform:uppercase; font-size:0.8rem; font-weight:bold; background:#047857; padding:4px 10px; border-radius:20px;">Unlocked Lesson Review</span>
+        <span style="text-transform:uppercase; font-size:0.8rem; font-weight:bold; background:#047857; padding:4px 10px; border-radius:20px;">Lesson Review</span>
         <h1 style="margin:5px 0 0 0; font-size:1.6rem;">{{ day['title'] }}</h1>
     </div>
 
     <div class="section-card">
         <h3>📜 Core Scripture Reference</h3>
-        <p style="font-size:1.1rem; font-style:italic;">{{ day['verse'] }}</p>
+        <p style="font-size:1.1rem; font-style:italic; color:#e2e8f0; margin:0;">{{ day['verse'] }}</p>
     </div>
 
     <div class="section-card">
         <h3>🛡️ Character Focus: {{ day['character_name'] }}</h3>
         <ul>
             {% for fact in facts %}
-                <li style="margin-bottom:6px;">{{ fact['fact_text'] }}</li>
+                <li>{{ fact['fact_text'] }}</li>
             {% endfor %}
         </ul>
     </div>
 
-    <div class="section-card" style="border-left: 5px solid #ef4444; background:#fff1f2;">
-        <h3 style="color:#991b1b;">💡 Parent Strategic Takeaway</h3>
-        <p style="font-size:1.05rem; line-height:1.5; color:#7f1d1d;">{{ day['parent_takeaway'] }}</p>
+    <div class="section-card" style="border-left: 5px solid #10b981; background: #064e3b2b;">
+        <h3 style="color:#34d399;">💡 What We Covered Today</h3>
+        <p style="font-size:1.05rem; line-height:1.5; color:#e2e8f0; margin:0;">{{ day['parent_takeaway'] }}</p>
     </div>
 </body>
 </html>
