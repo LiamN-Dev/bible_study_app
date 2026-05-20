@@ -6,14 +6,14 @@
     <title>Parent Portal Dashboard</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #f8fafc; color: #1e293b; max-width: 750px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
-        .header { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f8fafc; max-width: 750px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
+        .header { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .profile-stat { background: #f1f5f9; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 5px; }
-        .badge-span { display: inline-block; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; margin: 3px; font-weight: bold; }
-        .day-row { background: white; padding: 16px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid #cbd5e1; }
+        .card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .profile-stat { background: #0f172a; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 5px; color: #e2e8f0; border: 1px solid #334155; }
+        .badge-span { display: inline-block; background: #312e81; color: #c7d2fe; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; margin: 3px; font-weight: bold; border: 1px solid #4338ca; }
+        .day-row { background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #334155; border-left: 5px solid #475569; }
         .status-locked { border-left-color: #ef4444; }
         .status-unlocked { border-left-color: #10b981; }
         .btn-action { background: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: none; text-align: center; display: inline-block; }
@@ -25,29 +25,29 @@
         <h1 style="margin:0; font-size:1.6rem;">🏡 Parent Insights Portal</h1>
     </div>
 
-    <h2 style="font-size:1.2rem; margin-bottom:10px;">👦 Kid Standings & Achievements</h2>
+    <h2 style="font-size:1.2rem; margin-bottom:12px; color:#38bdf8;">👦 Kid Standings & Achievements</h2>
     <div class="grid">
         {% for p in profiles %}
         <div class="card">
-            <strong style="font-size:1.1rem; color:#4f46e5;">{{ p['display_name'] }}</strong>
+            <strong style="font-size:1.1rem; color:#818cf8;">{{ p['display_name'] }}</strong>
             <div class="profile-stat">Level {{ p['level'] }} · <span style="color:#10b981;">{{ p['points'] }} XP</span></div>
             <div style="margin-top:10px;">
                 {% for b in p['badges'] %}
                     <span class="badge-span" title="{{ b['badge_name'] }}">{{ b['emoji'] }} {{ b['badge_name'] }}</span>
                 {% else %}
-                    <span style="font-size:0.85rem; color:#94a3b8;">No badges assigned yet</span>
+                    <span style="font-size:0.85rem; color:#64748b; font-style:italic;">No badges assigned yet</span>
                 {% endfor %}
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <h2 style="font-size:1.2rem; margin-bottom:10px;">📅 Study Pipeline</h2>
+    <h2 style="font-size:1.2rem; margin-bottom:12px; color:#38bdf8;">📅 Study Pipeline</h2>
     {% for day in days %}
         <div class="day-row {{ 'status-locked' if day['is_locked'] else 'status-unlocked' }}">
             <div>
-                <strong>Day {{ day['day_number'] }}: {{ day['title'] }}</strong>
-                <p style="margin:5px 0 0 0; font-size:0.9rem; color:#64748b;">
+                <strong style="color:#f8fafc;">Day {{ day['day_number'] }}: {{ day['title'] }}</strong>
+                <p style="margin:5px 0 0 0; font-size:0.9rem; color:#94a3b8;">
                     {% if not day['is_locked'] %} <span style="color:#10b981; font-weight:bold;">🔓 Unlocked - Click to open overview</span> {% else %} 🔒 Locked Archive Module {% endif %}
                 </p>
             </div>
@@ -58,7 +58,7 @@
                             <button type="submit" class="btn-action" style="background:#ef4444;">Request View</button>
                         </form>
                     {% else %}
-                        <span style="color:#f59e0b; font-size:0.9rem; font-weight:bold;">⏳ Pending Access Approval</span>
+                        <span style="color:#fbbf24; font-size:0.9rem; font-weight:bold;">⏳ Pending Access Approval</span>
                     {% endif %}
                 {% else %}
                     <a href="/parent/day/{{ day['id'] }}" class="btn-action" style="background:#10b981;">Open Overview →</a>
