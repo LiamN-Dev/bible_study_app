@@ -1,6 +1,6 @@
 import sqlite3
 import random
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
 
 app = Flask(__name__)
 DB_FILE = "bible_study.db"
@@ -49,7 +49,7 @@ def init_db():
         )
     ''')
     
-    # 4. Student Profiles Table
+    # 4. Student Profiles Table (Upgraded dynamically with Cosmetic properties)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_profiles (
             username TEXT PRIMARY KEY,
@@ -59,6 +59,17 @@ def init_db():
             praise_count INTEGER DEFAULT 0
         )
     ''')
+
+    # DYNAMIC COLUMNS UPGRADE SAFE ENGINE
+    # This automatically updates your existing live database columns safely without wiping data!
+    cursor.execute("PRAGMA table_info(student_profiles)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'name_color' not in columns:
+        cursor.execute("ALTER TABLE student_profiles ADD COLUMN name_color TEXT DEFAULT '#ffffff'")
+    if 'name_style' not in columns:
+        cursor.execute("ALTER TABLE student_profiles ADD COLUMN name_style TEXT DEFAULT 'normal'")
+    if 'player_title' not in columns:
+        cursor.execute("ALTER TABLE student_profiles ADD COLUMN player_title TEXT DEFAULT ''")
     
     # 5. Badges Table
     cursor.execute('''
@@ -82,11 +93,10 @@ def init_db():
     # Seed profiles and initial configurations if completely empty
     cursor.execute("SELECT COUNT(*) FROM student_profiles")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("INSERT INTO student_profiles VALUES ('jude', 'Jude', 0, 1, 0)")
-        cursor.execute("INSERT INTO student_profiles VALUES ('beau', 'Beau', 0, 1, 0)")
+        cursor.execute("INSERT INTO student_profiles (username, display_name, points, level, praise_count) VALUES ('jude', 'Jude', 0, 1, 0)")
+        cursor.execute("INSERT INTO student_profiles (username, display_name, points, level, praise_count) VALUES ('beau', 'Beau', 0, 1, 0)")
         
         # --- AUTOMATED CURRICULUM DATA ---
-        # Day 1 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (1, 'Day 1: The Sword Boot Camp', 'Genesis 1:1', 'The Bible / Navigation', 
@@ -116,52 +126,8 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Sword Drill Challenge: Race to find Genesis 1:1 and Genesis 3:1."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Emphasize: Even right when things got broken, God promised a Savior would come to defeat the snake one day."))
 
-        # Day 3 Setup
-        cursor.execute('''
-            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (3, 'Day 3: The Giant Boat & The Tall Tower', 'Genesis 7:1 & Genesis 11:4', 'Noah & The People of Babel', 
-                    'Imagine waking up tomorrow and your sibling is speaking total gibberish. How would you clean your room together?', 
-                    'We looked at the global flood reset with Noah''s Ark (Genesis 7) and the skyscraper of pride at the Tower of Babel (Genesis 11). Talk tonight about why humility matters.', 1)
-        ''')
-        d3_id = cursor.lastrowid
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "The world gets so full of bad choices that God hits the reset button using a flood."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "God tells Noah to build a massive ark to save his family and the animals."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d3_id, "Humans proudly try to build a skyscraper (The Tower of Babel) to heaven to make themselves famous."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Bible Search target: Genesis Chapters 7 & 11."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Sword Drill Challenge: Race to find Genesis 7:1 and Genesis 11:4."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Key concept: God stops the proud construction by switching up their languages instantly, scattering them across the earth."))
-
-        # Day 4 Setup
-        cursor.execute('''
-            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (4, 'Day 4: The Ultimate Test & Joseph''s Dreams', 'Genesis 22:11 & Genesis 37:3', 'Abraham, Isaac & Joseph', 
-                    'Joseph''s brothers made a terrible choice out of jealousy. What is a better thing to do when you feel jealous of someone else?', 
-                    'We saw Abraham learn that God always provides (Genesis 22) and young Joseph get sold into slavery by his jealous brothers (Genesis 37). Great time to talk about handling family jealousy.', 1)
-        ''')
-        d4_id = cursor.lastrowid
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "God tests Abraham's trust with his son Isaac, but stops him at the last second and provides a ram instead."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "Teenage Joseph gets a fancy colorful coat from his dad and has dreams that he will be a ruler."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d4_id, "Joseph's brothers get so jealous that they throw him in a pit and sell him into slavery."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Bible Search target: Genesis Chapters 22 & 37."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Sword Drill Challenge: Race to find Genesis 22:11 and Genesis 37:3."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Takeaway point: Abraham learned God always provides. Joseph's story sets up how jealousy breaks relationships."))
-
-        # Day 5 Setup
-        cursor.execute('''
-            INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
-            VALUES (5, 'Day 5: The Friday Championship Tournament', 'Championship List', 'All Week Champions', 
-                    'No new stories today—this is pure game day to lock in your speed before school starts!', 
-                    'Tournament day! We drilled all 6 major target verses from this week to lock down their quick navigation mechanics.', 1)
-        ''')
-        d5_id = cursor.lastrowid
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d5_id, "This day is dedicated to a massive review game to lock in Bible navigation mechanics."))
-        cursor.execute("INSERT INTO character_facts (day_id, fact_text) VALUES (?, ?)", (d5_id, "Target list: Genesis 1:1, Genesis 3:4, Genesis 7:7, Genesis 11:9, Genesis 22:13, and Genesis 37:3."))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Tournament Instructions: Kids stand up with Bibles over their heads. Call out a target verse from the list, then yell 'CHARGE!'"))
-        cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Scoring: The first person to find the verse, stand up straight, and read the first three words wins 10 points."))
-
         cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (d1_id,))
     
-    # Fallback sanity check: Ensure app_state ALWAYS has a tracking configuration record
     cursor.execute("SELECT COUNT(*) FROM app_state WHERE id = 1")
     if cursor.fetchone()[0] == 0:
         cursor.execute("SELECT id FROM study_days ORDER BY day_number ASC LIMIT 1")
@@ -212,8 +178,30 @@ def student():
         p_dict['badges'] = conn.execute('SELECT * FROM badges WHERE username = ?', (p['username'],)).fetchall()
         profiles.append(p_dict)
         
+    # Get who is currently shopping from cookies, default to the first user found if not set
+    active_shopper_username = request.cookies.get('active_shopper')
+    if not active_shopper_username and profiles:
+        active_shopper_username = profiles[0]['username']
+        
+    shopper_data = None
+    for p in profiles:
+        if p['username'] == active_shopper_username:
+            shopper_data = p
+            break
+    if not shopper_data and profiles:
+        shopper_data = profiles[0]
+
     conn.close()
-    return render_template('student.html', day=day_data, facts=facts, profiles=profiles)
+    return render_template('student.html', day=day_data, facts=facts, profiles=profiles, shopper=shopper_data)
+
+# Route to change which kid is looking at the store page
+@app.route('/student/change_shopper', methods=['POST'])
+def change_shopper():
+    selected_kid = request.form.get('shopper_username')
+    response = make_response(redirect(url_for('student')))
+    if selected_kid:
+        response.set_cookie('active_shopper', selected_kid, max_age=60*60*24*7) # Save choice for a week
+    return response
 
 @app.route('/parent')
 def parent():
@@ -280,7 +268,7 @@ def admin():
                            current_day_id=current_day_id, notes_by_day=notes_by_day)
 
 # ========================================================
-# ADVANCED MECHANICS ENGINE (REWORKED PRAISE & SHOP CORNER)
+# ADVANCED MECHANICS ENGINE (REWORKED PRAISE & ULTRA SHOP)
 # ========================================================
 
 @app.route('/parent/praise/<username>', methods=['POST'])
@@ -302,16 +290,40 @@ def admin_adjust_praise(username, action):
     conn.close()
     return redirect(url_for('admin'))
 
+# REWORKED: Total Kid-Friendly Shop Matrix Engine 
 @app.route('/student/purchase_item/<username>', methods=['POST'])
 def student_purchase_item(username):
+    # Expanded kid-friendly store database matrix (Tags, colors, items!)
     SHOP_CATALOG = {
-        "dragon": {"name": "Mythic Dragon Familiar", "emoji": "🐉", "cost": 600},
-        "blade": {"name": "Legendary Paladin Blade", "emoji": "⚔️", "cost": 400},
-        "shield": {"name": "Archangel Aegis Shield", "emoji": "🛡️", "cost": 300},
-        "crown": {"name": "Crown of Wisdom", "emoji": "👑", "cost": 500},
-        "chariot": {"name": "Chariot of Fire Rider", "emoji": "🏎️", "cost": 750},
-        "aura": {"name": "Neon Star Aura", "emoji": "✨", "cost": 200}
+        # --- BADGES ---
+        "dragon": {"type": "badge", "name": "Mythic Dragon Familiar", "emoji": "🐉", "cost": 600},
+        "blade": {"type": "badge", "name": "Legendary Paladin Blade", "emoji": "⚔️", "cost": 400},
+        "shield": {"type": "badge", "name": "Archangel Aegis Shield", "emoji": "🛡️", "cost": 300},
+        "crown": {"type": "badge", "name": "Crown of Wisdom", "emoji": "👑", "cost": 500},
+        "chariot": {"type": "badge", "name": "Chariot of Fire Rider", "emoji": "🏎️", "cost": 750},
+        "aura": {"type": "badge", "name": "Neon Star Aura", "emoji": "✨", "cost": 200},
+        "lootbox": {"type": "lootbox", "cost": 350},
+        
+        # --- NAME COLORS ---
+        "color_fire": {"type": "color", "value": "#ff4500", "style": "glow", "cost": 300},
+        "color_neon_green": {"type": "color", "value": "#39ff14", "style": "glow", "cost": 400},
+        "color_laser_blue": {"type": "color", "value": "#00d2ff", "style": "glow", "cost": 500},
+        "color_glitch_pink": {"type": "color", "value": "#ff007f", "style": "glow", "cost": 600},
+        
+        # --- COOL RANK PREFIX TAGS ---
+        "title_superhero": {"type": "title", "value": "⚡[SUPER HERO] ", "cost": 450},
+        "title_ninja": {"type": "title", "value": "🥷[NINJA] ", "cost": 550},
+        "title_megaboss": {"type": "title", "value": "👑[MEGA BOSS] ", "cost": 700},
+        "title_space_cadet": {"type": "title", "value": "🚀[SPACE RANGER] ", "cost": 350}
     }
+    
+    LOOTBOX_POOL = [
+        {"name": "Laser Dino", "emoji": "🦖"},
+        {"name": "Golden Crown", "emoji": "👑"},
+        {"name": "Lightning Falcon", "emoji": "🦅"},
+        {"name": "Ninja Star", "emoji": "⭐"},
+        {"name": "Diamond Shield", "emoji": "💎"}
+    ]
     
     item_key = request.form.get('item_key')
     if item_key not in SHOP_CATALOG:
@@ -325,9 +337,28 @@ def student_purchase_item(username):
     
     if user and user['points'] >= cost:
         new_points = user['points'] - cost
+        
+        # 1. Update Core Points Wallet Balance
         conn.execute('UPDATE student_profiles SET points = ? WHERE username = ?', (new_points, username))
-        conn.execute('INSERT INTO badges (username, badge_name, emoji) VALUES (?, ?, ?)', 
-                     (username, selected_item['name'], selected_item['emoji']))
+        
+        # 2. Process specific style unlock actions
+        if selected_item['type'] == 'badge':
+            conn.execute('INSERT INTO badges (username, badge_name, emoji) VALUES (?, ?, ?)', 
+                         (username, selected_item['name'], selected_item['emoji']))
+                         
+        elif selected_item['type'] == 'lootbox':
+            rolled_reward = random.choice(LOOTBOX_POOL)
+            conn.execute('INSERT INTO badges (username, badge_name, emoji) VALUES (?, ?, ?)', 
+                         (username, f"Lootbox: {rolled_reward['name']}", rolled_reward['emoji']))
+                         
+        elif selected_item['type'] == 'color':
+            conn.execute('UPDATE student_profiles SET name_color = ?, name_style = ? WHERE username = ?',
+                         (selected_item['value'], selected_item['style'], username))
+                         
+        elif selected_item['type'] == 'title':
+            conn.execute('UPDATE student_profiles SET player_title = ? WHERE username = ?',
+                         (selected_item['value'], username))
+                         
         conn.commit()
         
     conn.close()
@@ -392,7 +423,6 @@ def add_day():
         ''', (day_num, title, verse, char_name, mission, parent_takeaway))
         day_id = cursor.lastrowid
         
-        # If this is the first day ever being added dynamically, sync it into app_state tracking
         cursor.execute("SELECT current_active_day_id FROM app_state WHERE id = 1")
         current_active = cursor.fetchone()
         if current_active and current_active['current_active_day_id'] is None:
@@ -418,7 +448,6 @@ def delete_day(day_id):
     conn.execute('DELETE FROM character_facts WHERE day_id = ?', (day_id,))
     conn.execute('DELETE FROM liam_notes WHERE day_id = ?', (day_id,))
     
-    # Clean up fallback state if active tracking day is removed
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
     if active_day_row and active_day_row['current_active_day_id'] == day_id:
         next_day = conn.execute('SELECT id FROM study_days ORDER BY day_number ASC LIMIT 1').fetchone()
