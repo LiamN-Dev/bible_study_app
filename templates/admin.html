@@ -37,7 +37,7 @@
                 <form action="/admin/set_active_day" method="POST" style="display:flex; gap:1rem;">
                     <select name="day_id">
                         {% for d in days %}
-                            <option value="{{ d.id }}" {% if current_day_id == d.id %}selected{% endif %}>Day {{ d.day_number }}: {{ d.title }}</option>
+                            <option value="{{ d['id'] }}" {% if current_day_id == d['id'] %}selected{% endif %}>Day {{ d['day_number'] }}: {{ d['title'] }}</option>
                         {% endfor %}
                     </select>
                     <button type="submit" style="height: 40px;">Activate Tracks</button>
@@ -48,20 +48,20 @@
                 <h2>Manage Player Entity Properties</h2>
                 {% for p in profiles %}
                     <div style="background:#1f2937; padding:1rem; border-radius:8px; margin-bottom:1rem; border:1px solid #374151;">
-                        <h4 style="margin:0 0 0.5rem 0; font-size:1.1rem; color:#f59e0b;">{{ p.display_name }} (Lv.{{ p.level }})</h4>
-                        <p style="margin:0 0 1rem 0; font-size:0.85rem; color:#94a3b8;">Wallet: {{ p.points }} pts | Lifetime XP: {{ p.total_xp }} | Praises: {{ p.praise_count }}</p>
+                        <h4 style="margin:0 0 0.5rem 0; font-size:1.1rem; color:#f59e0b;">{{ p['display_name'] }} (Lv.{{ p['level'] }})</h4>
+                        <p style="margin:0 0 1rem 0; font-size:0.85rem; color:#94a3b8;">Wallet: {{ p['points'] }} pts | Lifetime XP: {{ p['total_xp'] }} | Praises: {{ p['praise_count'] }}</p>
                         
-                        <form action="/admin/reward/{{ p.username }}" method="POST" style="display:inline-flex; gap:0.5rem; margin-bottom:0.5rem;">
+                        <form action="/admin/reward/{{ p['username'] }}" method="POST" style="display:inline-flex; gap:0.5rem; margin-bottom:0.5rem;">
                             <input type="number" name="xp" value="50" style="width:70px; margin:0; padding:0.3rem;">
                             <button type="submit">Modify XP/Wallet</button>
                         </form>
 
                         <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
-                            <form action="/admin/adjust_praise/{{ p.username }}/add" method="POST"><button type="submit" style="background:#ec4899; padding:0.3rem 0.6rem;">+ Praise</button></form>
-                            <form action="/admin/adjust_praise/{{ p.username }}/remove" method="POST"><button type="submit" style="background:#6b7280; padding:0.3rem 0.6rem;">- Praise</button></form>
+                            <form action="/admin/adjust_praise/{{ p['username'] }}/add" method="POST"><button type="submit" style="background:#ec4899; padding:0.3rem 0.6rem;">+ Praise</button></form>
+                            <form action="/admin/adjust_praise/{{ p['username'] }}/remove" method="POST"><button type="submit" style="background:#6b7280; padding:0.3rem 0.6rem;">- Praise</button></form>
                         </div>
 
-                        <form action="/admin/award_badge/{{ p.username }}" method="POST" style="display:flex; gap:0.5rem; margin:0;">
+                        <form action="/admin/award_badge/{{ p['username'] }}" method="POST" style="display:flex; gap:0.5rem; margin:0;">
                             <input type="text" name="badge_name" placeholder="Badge Title" style="margin:0; padding:0.3rem;" required>
                             <input type="text" name="emoji" placeholder="⚔️" style="width:50px; margin:0; padding:0.3rem;" required>
                             <button type="submit" style="background:#10b981;">Gift Item</button>
@@ -75,9 +75,9 @@
                 {% if notes_by_day %}
                     {% for d_id, group in notes_by_day.items() %}
                         <details style="background:#1f2937; margin-bottom:0.5rem; padding:0.5rem; border-radius:4px;">
-                            <summary style="cursor:pointer; font-weight:bold; color:#38bdf8;">{{ group.title }}</summary>
+                            <summary style="cursor:pointer; font-weight:bold; color:#38bdf8;">{{ group['title'] }}</summary>
                             <ul style="margin: 0.5rem 0 0 0; padding-left: 1.25rem;">
-                                {% for item in group.items %}
+                                {% for item in group['items'] %}
                                     <li style="font-size:0.95rem; margin-bottom:0.25rem;">{{ item }}</li>
                                 {% endfor %}
                             </ul>
@@ -126,18 +126,19 @@
                 {% for d in days %}
                     <div class="row-item">
                         <div style="max-width: 60%;">
-                            <strong>Day {{ d.day_number }}: {{ d.title }}</strong>
-                            {% if d.request_pending %}
+                            <strong>Day {{ d['day_number'] }}: {{ d['title'] }}</strong>
+                            {% if d['request_pending'] %}
                                 <div style="color:#f59e0b; font-size:0.8rem; font-weight:bold;">⚠️ ACCESS REQUEST INCOMING FROM PARENTS</div>
                             {% endif %}
                         </div>
                         <div style="display:flex; gap:0.4rem;">
-                            {% if d.is_locked %}
-                                <form action="/unlock_day/{{ d.id }}" method="POST"><button type="submit" class="btn-unlock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔓 Grant Unlock</button></form>
+                            {% if d['is_locked'] %}
+                                <form action="/unlock_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-unlock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔓 Grant Unlock</button></form>
                             {% else %}
-                                <form action="/lock_day/{{ d.id }}" method="POST"><button type="submit" class="btn-lock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔒 Lock Down</button></form>
+                                <form action="/lock_day/{{ d['id'] }}" method="POST"><button type="submit" class="btn-lock" style="padding:0.4rem 0.7rem; font-size:0.85rem;">🔒 Lock Down</button></form>
                             {% endif %}
-                            <form action="/admin/delete_day/{{ d.id }}" method="POST" onsubmit="return confirm('Expunge this data node permanently? This cannot be undone.');">
+                            
+                            <form action="/admin/delete_day/{{ d['id'] }}" method="POST" onsubmit="return confirm('Expunge this data node permanently? This cannot be undone.');">
                                 <button type="submit" class="btn-danger" style="padding:0.4rem 0.7rem; font-size:0.85rem;">Expunge Node</button>
                             </form>
                         </div>
