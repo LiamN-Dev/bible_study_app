@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for
+import random
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__)
 DB_FILE = "bible_study.db"
@@ -38,7 +39,7 @@ def init_db():
         )
     ''')
     
-    # 3. Teaching Notes Table (Liam's Notes)
+    # 3. Teaching Notes Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS liam_notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,13 +49,14 @@ def init_db():
         )
     ''')
     
-    # 4. Student Profiles Table
+    # 4. Student Profiles Table (Upgraded with Praise Count tracking)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS student_profiles (
             username TEXT PRIMARY KEY,
             display_name TEXT NOT NULL,
             points INTEGER DEFAULT 0,
-            level INTEGER DEFAULT 1
+            level INTEGER DEFAULT 1,
+            praise_count INTEGER DEFAULT 0
         )
     ''')
     
@@ -80,14 +82,11 @@ def init_db():
     # Seed profiles and initial configurations if completely empty
     cursor.execute("SELECT COUNT(*) FROM student_profiles")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("INSERT INTO student_profiles VALUES ('jude', 'Jude', 0, 1)")
-        cursor.execute("INSERT INTO student_profiles VALUES ('beau', 'Beau', 0, 1)")
+        cursor.execute("INSERT INTO student_profiles VALUES ('jude', 'Jude', 0, 1, 0)")
+        cursor.execute("INSERT INTO student_profiles VALUES ('beau', 'Beau', 0, 1, 0)")
         
-        # ========================================================
-        # AUTOMATED MASS CURRICULUM UPLOAD (DAYS 1-5)
-        # ========================================================
-        
-        # --- DAY 1 ---
+        # --- AUTOMATED CURRICULUM DATA ---
+        # Day 1 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (1, 'Day 1: The Sword Boot Camp', 'Genesis 1:1', 'The Bible / Navigation', 
@@ -102,7 +101,7 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "GPS Code explanation: Genesis 1:1 is Book -> Chapter (Big) -> Verse (Tiny). Like City -> Street -> House."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d1_id, "Game Rules: Hold Bibles flat on palms above heads. Shout 'Draw your swords! Find Genesis 1:1... CHARGE!' Run 3 practice rounds."))
 
-        # --- DAY 2 ---
+        # Day 2 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (2, 'Day 2: Creation & The Sneaky Snake', 'Genesis 1:1 & Genesis 3:1', 'Adam, Eve & The Snake', 
@@ -117,7 +116,7 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Sword Drill Challenge: Race to find Genesis 1:1 and Genesis 3:1."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d2_id, "Emphasize: Even right when things got broken, God promised a Savior would come to defeat the snake one day."))
 
-        # --- DAY 3 ---
+        # Day 3 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (3, 'Day 3: The Giant Boat & The Tall Tower', 'Genesis 7:1 & Genesis 11:4', 'Noah & The People of Babel', 
@@ -132,7 +131,7 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Sword Drill Challenge: Race to find Genesis 7:1 and Genesis 11:4."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d3_id, "Key concept: God stops the proud construction by switching up their languages instantly, scattering them across the earth."))
 
-        # --- DAY 4 ---
+        # Day 4 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (4, 'Day 4: The Ultimate Test & Joseph''s Dreams', 'Genesis 22:11 & Genesis 37:3', 'Abraham, Isaac & Joseph', 
@@ -147,7 +146,7 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Sword Drill Challenge: Race to find Genesis 22:11 and Genesis 37:3."))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d4_id, "Takeaway point: Abraham learned God always provides. Joseph's story sets up how jealousy breaks relationships."))
 
-        # --- DAY 5 ---
+        # Day 5 Setup
         cursor.execute('''
             INSERT INTO study_days (day_number, title, verse, character_name, kids_mission, parent_takeaway, is_locked)
             VALUES (5, 'Day 5: The Friday Championship Tournament', 'Championship List', 'All Week Champions', 
@@ -160,7 +159,6 @@ def init_db():
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Tournament Instructions: Kids stand up with Bibles over their heads. Call out a target verse from the list, then yell 'CHARGE!'"))
         cursor.execute("INSERT INTO liam_notes (day_id, note_text) VALUES (?, ?)", (d5_id, "Scoring: The first person to find the verse, stand up straight, and read the first three words wins 10 points."))
 
-        # Set default active module link to Day 1
         cursor.execute("INSERT INTO app_state (id, current_active_day_id) VALUES (1, ?)", (d1_id,))
         conn.commit()
         
@@ -174,13 +172,16 @@ PASSWORD_DATABASE = {"admin": "liam123", "parent": "parents2026", "student": "bi
 def home():
     return render_template('login.html')
 
+# NEW INTERCEPT: Processes login securely via asynchronous requests to avoid redirects on errors
 @app.route('/login', methods=['POST'])
 def handle_login():
     role = request.form.get('role')
     password = request.form.get('password')
+    
     if password == PASSWORD_DATABASE.get(role):
-        return redirect(url_for(role))
-    return "<h1>Incorrect Password!</h1><p><a href='/'>Go back and try again.</a></p>"
+        return jsonify({"success": True, "redirect_url": url_for(role)})
+    else:
+        return jsonify({"success": False, "message": f"Incorrect security key for {role.upper()} portal. Please try again!"})
 
 # ========================================================
 # PORTALS & ROUTING MODULES
@@ -250,7 +251,6 @@ def admin():
     active_day_row = conn.execute('SELECT current_active_day_id FROM app_state WHERE id = 1').fetchone()
     current_day_id = active_day_row['current_active_day_id'] if active_day_row else None
     
-    # NEW FIX: Gather ALL notes, grouped cleanly by their day_id for individual display sections
     all_notes_raw = conn.execute('''
         SELECT liam_notes.*, study_days.day_number, study_days.title 
         FROM liam_notes 
@@ -258,7 +258,6 @@ def admin():
         ORDER BY study_days.day_number ASC
     ''').fetchall()
     
-    # Structure the notes dynamically into a dictionary grouped by day_id
     notes_by_day = {}
     for note in all_notes_raw:
         d_id = note['day_id']
@@ -274,8 +273,47 @@ def admin():
                            current_day_id=current_day_id, notes_by_day=notes_by_day)
 
 # ========================================================
-# ENGINE MANAGEMENT PORTS (REWARDS, BADGES, & ACTIONS)
+# ADVANCED MECHANICS ENGINE (PRAISE, LOOT BOXES, REWARDS)
 # ========================================================
+
+# NEW FEATURE: Direct Parent Encouragement Star Port
+@app.route('/parent/praise/<username>', methods=['POST'])
+def parent_praise(username):
+    conn = get_db_connection()
+    conn.execute('UPDATE student_profiles SET praise_count = praise_count + 1 WHERE username = ?', (username,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('parent'))
+
+# NEW FEATURE: Mystery Loot Box Point Shop Exchange
+@app.route('/student/buy_lootbox/<username>', methods=['POST'])
+def buy_lootbox(username):
+    MYSTERY_POOL = [
+        {"name": "Mythic Dragon Familiar", "emoji": "🐉"},
+        {"name": "Legendary Paladin Blade", "emoji": "⚔️"},
+        {"name": "Archangel Aegis Shield", "emoji": "🛡️"},
+        {"name": "Crown of Wisdom", "emoji": "👑"},
+        {"name": "Chariot of Fire Rider", "emoji": "🏎️"},
+        {"name": "Neon Star Aura", "emoji": "✨"}
+    ]
+    
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM student_profiles WHERE username = ?', (username,)).fetchone()
+    
+    if user and user['points'] >= 500:
+        # Deduct cost
+        new_points = user['points'] - 500
+        conn.execute('UPDATE student_profiles SET points = ? WHERE username = ?', (new_points, username))
+        
+        # Roll reward item
+        prize = random.choice(MYSTERY_POOL)
+        conn.execute('INSERT INTO badges (username, badge_name, emoji) VALUES (?, ?, ?)', 
+                     (username, prize['name'], prize['emoji']))
+        conn.commit()
+        
+    conn.close()
+    return redirect(url_for('student'))
+
 @app.route('/admin/reward/<username>', methods=['POST'])
 def award_xp(username):
     xp_amount = int(request.form.get('xp', 50))
